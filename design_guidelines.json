@@ -1,0 +1,131 @@
+{
+  "design_system": {
+    "name": "Al-Waha (The Oasis)",
+    "description": "A professional financial dashboard blending Webull's density with Arabic cultural aesthetics. Light, airy, and legible.",
+    "theme": "light",
+    "direction": "rtl",
+    "typography": {
+      "font_family": {
+        "heading": "Amiri, serif",
+        "body": "IBM Plex Sans Arabic, sans-serif",
+        "mono": "IBM Plex Mono, monospace"
+      },
+      "scale": {
+        "h1": "text-4xl font-bold tracking-tight",
+        "h2": "text-3xl font-semibold tracking-tight",
+        "h3": "text-2xl font-semibold",
+        "body_lg": "text-lg leading-relaxed",
+        "body": "text-base leading-relaxed",
+        "caption": "text-sm text-muted-foreground"
+      }
+    },
+    "colors": {
+      "palette": {
+        "background": "hsl(35, 30%, 96%)",
+        "foreground": "hsl(200, 50%, 15%)",
+        "card": "hsl(35, 30%, 98%)",
+        "card_foreground": "hsl(200, 50%, 15%)",
+        "popover": "hsl(35, 30%, 98%)",
+        "popover_foreground": "hsl(200, 50%, 15%)",
+        "primary": "hsl(195, 80%, 40%)",
+        "primary_foreground": "hsl(0, 0%, 100%)",
+        "secondary": "hsl(35, 40%, 85%)",
+        "secondary_foreground": "hsl(35, 60%, 20%)",
+        "muted": "hsl(35, 20%, 90%)",
+        "muted_foreground": "hsl(200, 20%, 40%)",
+        "accent": "hsl(35, 50%, 92%)",
+        "accent_foreground": "hsl(195, 80%, 40%)",
+        "destructive": "hsl(0, 84%, 60%)",
+        "destructive_foreground": "hsl(0, 0%, 98%)",
+        "border": "hsl(35, 20%, 85%)",
+        "input": "hsl(35, 20%, 85%)",
+        "ring": "hsl(195, 80%, 40%)"
+      },
+      "usage": {
+        "primary": "Main actions, active states, key highlights (Sky Blue)",
+        "secondary": "Backgrounds for sidebars, secondary buttons (Sand)",
+        "accent": "Hover states, subtle highlights",
+        "background": "Main app background (Warm Sand White)"
+      }
+    },
+    "layout": {
+      "structure": "Webull-style 3-panel layout (RTL)",
+      "grid": {
+        "dashboard": "grid grid-cols-12 gap-4 h-screen p-4",
+        "sidebar_right": "col-span-2 hidden lg:flex flex-col border-l border-border/50 bg-card/50 backdrop-blur-sm",
+        "main_content": "col-span-12 lg:col-span-7 flex flex-col bg-card rounded-lg shadow-sm border border-border/50 overflow-hidden",
+        "sidebar_left": "col-span-3 hidden lg:flex flex-col border-r border-border/50 bg-card/50 backdrop-blur-sm"
+      },
+      "spacing": {
+        "container_padding": "p-6",
+        "section_gap": "gap-6",
+        "item_gap": "gap-3"
+      }
+    },
+    "components": {
+      "buttons": {
+        "primary": "bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-6 py-2 font-medium transition-all shadow-sm hover:shadow-md",
+        "secondary": "bg-secondary text-secondary-foreground hover:bg-secondary/80 rounded-full px-6 py-2 font-medium transition-all",
+        "ghost": "hover:bg-accent hover:text-accent-foreground rounded-full px-4 py-2 transition-colors"
+      },
+      "cards": {
+        "base": "bg-card text-card-foreground rounded-xl border border-border/60 shadow-sm hover:shadow-md transition-all duration-300",
+        "interactive": "cursor-pointer hover:border-primary/50 hover:bg-accent/50"
+      },
+      "inputs": {
+        "base": "bg-background border-input focus:border-primary focus:ring-1 focus:ring-primary rounded-lg px-4 py-2 text-right"
+      }
+    },
+    "visual_enhancers": {
+      "patterns": {
+        "geometric_overlay": "absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://images.unsplash.com/photo-1739994885957-add0b729f051?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Nzd8MHwxfHNlYXJjaHwxfHxpc2xhbWljJTIwZ2VvbWV0cmljJTIwcGF0dGVybiUyMHNlYW1sZXNzJTIwYmVpZ2V8ZW58MHx8fHwxNzY3NDQ5MDU2fDA&ixlib=rb-4.1.0&q=85')] bg-repeat mix-blend-multiply",
+        "sand_texture": "bg-[url('https://images.unsplash.com/photo-1680214180543-119d7f766381?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2Mzl8MHwxfHNlYXJjaHwxfHxkZXNlcnQlMjBzYW5kJTIwdGV4dHVyZSUyMGxpZ2h0JTIwc3VidGxlfGVufDB8fHx8MTc2NzQ0OTA1OHww&ixlib=rb-4.1.0&q=85')] bg-cover bg-center opacity-10"
+      },
+      "borders": "border border-border/60",
+      "shadows": "shadow-[0_2px_8px_rgba(0,0,0,0.04)]",
+      "glass": "bg-white/60 backdrop-blur-md border border-white/20"
+    },
+    "assets": {
+      "images": {
+        "geometric_pattern": "https://images.unsplash.com/photo-1739994885957-add0b729f051?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Nzd8MHwxfHNlYXJjaHwxfHxpc2xhbWljJTIwZ2VvbWV0cmljJTIwcGF0dGVybiUyMHNlYW1sZXNzJTIwYmVpZ2V8ZW58MHx8fHwxNzY3NDQ5MDU2fDA&ixlib=rb-4.1.0&q=85",
+        "sand_texture": "https://images.unsplash.com/photo-1680214180543-119d7f766381?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2Mzl8MHwxfHNlYXJjaHwxfHxkZXNlcnQlMjBzYW5kJTIwdGV4dHVyZSUyMGxpZ2h0JTIwc3VidGxlfGVufDB8fHx8MTc2NzQ0OTA1OHww&ixlib=rb-4.1.0&q=85",
+        "floral_ornament": "https://images.unsplash.com/photo-1613982102700-e8715e4f472e?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NjZ8MHwxfHNlYXJjaHwzfHxhcmFiaWMlMjBmbG9yYWwlMjBvcm5hbWVudCUyMHZlY3RvciUyMHN0eWxlfGVufDB8fHx8MTc2NzQ0OTA2MHww&ixlib=rb-4.1.0&q=85"
+      },
+      "icons": "lucide-react"
+    }
+  },
+  "instructions_to_main_agent": [
+    "CRITICAL: Set 'dir=rtl' on the root html element or main container immediately.",
+    "Install 'lucide-react' for icons.",
+    "Use the provided HSL color values in 'tailwind.config.js' to override the default shadcn colors. Do not just add them as new colors, REPLACE the existing CSS variables in 'index.css' or the config.",
+    "Import the fonts: Add '@import url(\"https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap\");' to index.css.",
+    "Apply 'font-family: \"IBM Plex Sans Arabic\", sans-serif;' to the body.",
+    "Use 'font-family: \"Amiri\", serif;' for all h1, h2, h3 headings.",
+    "The layout must be 3 columns on desktop: Right Sidebar (Nav), Center (Content), Left Sidebar (Insights). This is the REVERSE of standard LTR Webull layouts.",
+    "Use the 'geometric_pattern' image as a subtle background overlay on the Sidebars (opacity 0.03).",
+    "Ensure all text is right-aligned by default ('text-right').",
+    "Use 'sonner' for toast notifications.",
+    "Do not use charts. This is a text-analysis dashboard.",
+    "Authentication page should use the 'sand_texture' as a background with a glassmorphism card for the login form."
+  ],
+  "universal_guidelines": [
+    "Dark colors look good when used independently without gradients. DO NOT use dark colors as gradients",
+    "Don't make generic centered layouts, simplistic gradients, and uniform styling.",
+    "Create depth through layered design elements with z-index hierarchy",
+    "Use glass-morphism effects with backdrop filters (12-24px blur)",
+    "You MUST NOT apply universal transition. Eg: 'transition: all'. This results in breaking transforms. Always add transitions for specific interactive elements like button, input excluding transforms",
+    "You MUST NOT center align the app container, ie do not add '.App { text-align: center; }' in the css file. This disrupts the human natural reading flow of text",
+    "Always use modern button styles like pill-shaped, or sharp button with interaction animations & color relevant to the app style",
+    "NEVER: use AI assistant Emoji characters like 🤖🧠💭💡🔮🎯📚🎭🎬🎪🎉🎊🎁🎀🎂🍰🎈🎨🎰💰💵💳🏦💎🪙💸🤑📊📈📉💹🔢🏆🥇 etc for icons.",
+    "Every interaction needs micro-animations - hover states, transitions, parallax effects, and entrance animations. Static = dead.",
+    "Use 2-3x more spacing than feels comfortable. Cramped designs look cheap.",
+    "Subtle grain textures, noise overlays, custom cursors, selection states, and loading animations: separates good from extraordinary.",
+    "Main agent relies on these image URLs. Missing categories (especially sponsor logos) = main agent will use placeholder text which is FORBIDDEN",
+    "Prioritize using pre-existing components from src/components/ui when applicable",
+    "Create new components that match the style and conventions of existing components when needed",
+    "Examine existing components to understand the project's component patterns before creating new ones",
+    "Components MUST use named exports (export const ComponentName = ...)",
+    "Pages MUST use default exports (export default function PageName() {...})",
+    "Use 'sonner' for toasts"
+  ]
+}
