@@ -1,0 +1,180 @@
+import { createContext, useContext, useState, useEffect } from 'react';
+
+const LanguageContext = createContext();
+
+export const translations = {
+  ar: {
+    appName: 'الواحة المالية',
+    appTagline: 'منصة التحليل المالي',
+    appDescription: 'تحليلات مالية متقدمة للأسواق الخليجية والعربية',
+    loginButton: 'تسجيل الدخول عبر Google',
+    loginDisclaimer: 'بالتسجيل، أنت توافق على شروط الخدمة وسياسة الخصوصية',
+    loading: 'جاري التحميل...',
+    authenticating: 'جاري المصادقة...',
+    logout: 'تسجيل الخروج',
+    adminDashboard: 'لوحة تحكم المدير',
+    userDashboard: 'لوحة المستخدم',
+    markets: 'الأسواق',
+    assets: 'الأصول',
+    analysis: 'التحليلات',
+    createMarket: 'إضافة سوق جديد',
+    createMarketDesc: 'أضف سوق مالي جديد للمنصة',
+    createAsset: 'إضافة أصل جديد',
+    createAssetDesc: 'أضف سهم أو مؤشر جديد',
+    createAnalysis: 'إضافة تحليل جديد',
+    createAnalysisDesc: 'أضف أو حدّث تحليل لأصل معين',
+    currentMarkets: 'الأسواق الحالية',
+    currentMarketsDesc: 'قائمة الأسواق المتاحة',
+    currentAssets: 'الأصول الحالية',
+    currentAssetsDesc: 'قائمة الأصول المتاحة',
+    noMarkets: 'لا توجد أسواق بعد',
+    noAssets: 'لا توجد أصول بعد',
+    nameAr: 'الاسم بالعربية',
+    nameEn: 'الاسم بالإنجليزية',
+    region: 'المنطقة',
+    regionPlaceholder: 'مثال: الخليج، اسطنبول، القاهرة',
+    market: 'السوق',
+    selectMarket: 'اختر السوق',
+    type: 'النوع',
+    stock: 'سهم',
+    index: 'مؤشر',
+    asset: 'الأصل',
+    selectAsset: 'اختر الأصل',
+    bias: 'التوجه',
+    biasPlaceholder: 'مثال: صاعد، هابط، محايد',
+    keyLevels: 'المستويات الرئيسية',
+    keyLevelsPlaceholder: 'دعم: 100، مقاومة: 120، هدف: 130',
+    scenario: 'السيناريو',
+    scenarioPlaceholder: 'وصف السيناريو المتوقع...',
+    higherTFInsight: 'ملاحظات الإطار الزمني الأعلى (اختياري)',
+    higherTFPlaceholder: 'ملاحظات إضافية...',
+    riskNote: 'ملاحظة المخاطر (اختياري)',
+    riskPlaceholder: 'تحذيرات أو مخاطر محتملة...',
+    confidenceLevel: 'مستوى الثقة',
+    confidenceLow: 'منخفض',
+    confidenceMedium: 'متوسط',
+    confidenceHigh: 'عالي',
+    createMarketButton: 'إنشاء السوق',
+    createAssetButton: 'إنشاء الأصل',
+    publishAnalysis: 'نشر التحليل',
+    marketCreated: 'تم إنشاء السوق بنجاح',
+    marketFailed: 'فشل إنشاء السوق',
+    assetCreated: 'تم إنشاء الأصل بنجاح',
+    assetFailed: 'فشل إنشاء الأصل',
+    analysisCreated: 'تم إنشاء التحليل بنجاح',
+    analysisFailed: 'فشل إنشاء التحليل',
+    welcome: 'مرحباً بك في الواحة المالية',
+    selectAssetToView: 'اختر أصلاً من القائمة لعرض التحليل',
+    noAnalysis: 'لا يوجد تحليل متاح لهذا الأصل حالياً',
+    direction: 'التوجه',
+    confidence: 'مستوى الثقة',
+    keyLevelsTitle: 'المستويات الرئيسية',
+    scenarioTitle: 'السيناريو المتوقع',
+    lastUpdated: 'آخر تحديث',
+    additionalInsights: 'رؤى إضافية',
+    higherTimeframe: 'الإطار الزمني الأعلى',
+    riskWarning: 'تحذير المخاطر',
+    noInsights: 'لا توجد رؤى إضافية'
+  },
+  en: {
+    appName: 'Al-Waha Financial',
+    appTagline: 'Financial Analysis Platform',
+    appDescription: 'Advanced financial analysis for Gulf and Arab markets',
+    loginButton: 'Sign in with Google',
+    loginDisclaimer: 'By signing in, you agree to our Terms of Service and Privacy Policy',
+    loading: 'Loading...',
+    authenticating: 'Authenticating...',
+    logout: 'Logout',
+    adminDashboard: 'Admin Dashboard',
+    userDashboard: 'User Dashboard',
+    markets: 'Markets',
+    assets: 'Assets',
+    analysis: 'Analysis',
+    createMarket: 'Add New Market',
+    createMarketDesc: 'Add a new financial market to the platform',
+    createAsset: 'Add New Asset',
+    createAssetDesc: 'Add a new stock or index',
+    createAnalysis: 'Add New Analysis',
+    createAnalysisDesc: 'Add or update analysis for a specific asset',
+    currentMarkets: 'Current Markets',
+    currentMarketsDesc: 'List of available markets',
+    currentAssets: 'Current Assets',
+    currentAssetsDesc: 'List of available assets',
+    noMarkets: 'No markets yet',
+    noAssets: 'No assets yet',
+    nameAr: 'Arabic Name',
+    nameEn: 'English Name',
+    region: 'Region',
+    regionPlaceholder: 'e.g., Gulf, Istanbul, Cairo',
+    market: 'Market',
+    selectMarket: 'Select Market',
+    type: 'Type',
+    stock: 'Stock',
+    index: 'Index',
+    asset: 'Asset',
+    selectAsset: 'Select Asset',
+    bias: 'Bias',
+    biasPlaceholder: 'e.g., Bullish, Bearish, Neutral',
+    keyLevels: 'Key Levels',
+    keyLevelsPlaceholder: 'Support: 100, Resistance: 120, Target: 130',
+    scenario: 'Scenario',
+    scenarioPlaceholder: 'Describe the expected scenario...',
+    higherTFInsight: 'Higher Timeframe Insight (Optional)',
+    higherTFPlaceholder: 'Additional notes...',
+    riskNote: 'Risk Note (Optional)',
+    riskPlaceholder: 'Warnings or potential risks...',
+    confidenceLevel: 'Confidence Level',
+    confidenceLow: 'Low',
+    confidenceMedium: 'Medium',
+    confidenceHigh: 'High',
+    createMarketButton: 'Create Market',
+    createAssetButton: 'Create Asset',
+    publishAnalysis: 'Publish Analysis',
+    marketCreated: 'Market created successfully',
+    marketFailed: 'Failed to create market',
+    assetCreated: 'Asset created successfully',
+    assetFailed: 'Failed to create asset',
+    analysisCreated: 'Analysis created successfully',
+    analysisFailed: 'Failed to create analysis',
+    welcome: 'Welcome to Al-Waha Financial',
+    selectAssetToView: 'Select an asset from the list to view analysis',
+    noAnalysis: 'No analysis available for this asset currently',
+    direction: 'Direction',
+    confidence: 'Confidence Level',
+    keyLevelsTitle: 'Key Levels',
+    scenarioTitle: 'Expected Scenario',
+    lastUpdated: 'Last Updated',
+    additionalInsights: 'Additional Insights',
+    higherTimeframe: 'Higher Timeframe',
+    riskWarning: 'Risk Warning',
+    noInsights: 'No additional insights'
+  }
+};
+
+export function LanguageProvider({ children }) {
+  const [language, setLanguage] = useState(() => {
+    return localStorage.getItem('language') || 'ar';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('language', language);
+    document.documentElement.setAttribute('dir', language === 'ar' ? 'rtl' : 'ltr');
+    document.documentElement.setAttribute('lang', language);
+  }, [language]);
+
+  const t = (key) => translations[language][key] || key;
+
+  return (
+    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+      {children}
+    </LanguageContext.Provider>
+  );
+}
+
+export function useLanguage() {
+  const context = useContext(LanguageContext);
+  if (!context) {
+    throw new Error('useLanguage must be used within LanguageProvider');
+  }
+  return context;
+}
