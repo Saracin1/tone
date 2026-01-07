@@ -1,0 +1,51 @@
+[
+  {
+    "market_id": "market_gcc_mjydp7qm",
+    "name_ar": "السوق السعودي",
+    "name_en": "Saudi Market",
+    "region": "الخليج",
+    "created_at": "2026-01-03T14:08:55.918Z"
+  },
+  {
+    "market_id": "market_istanbul_mjydp7qm",
+    "name_ar": "بورصة إسطنبول",
+    "name_en": "Istanbul Stock Exchange",
+    "region": "تركيا",
+    "created_at": "2026-01-03T14:08:55.918Z"
+  },
+  {
+    "market_id": "market_cairo_mjydp7qm",
+    "name_ar": "البورصة المصرية",
+    "name_en": "Egyptian Exchange",
+    "region": "مصر",
+    "created_at": "2026-01-03T14:08:55.918Z"
+  },
+  {
+    "market_id": "market_f77ebd439ed9",
+    "name_ar": "سوق الاختبار",
+    "name_en": "Test Market",
+    "region": "Test Region",
+    "created_at": "2026-01-03T14:11:34.040316+00:00"
+  },
+  {
+    "market_id": "market_668bfeaefccc",
+    "name_ar": "سوق الاختبار الجديد",
+    "name_en": "New Test Market",
+    "region": "Test Region",
+    "created_at": "2026-01-03T14:12:25.293706+00:00"
+  },
+  {
+    "market_id": "market_dfac5109160d",
+    "name_ar": "سوق الاختبار",
+    "name_en": "Test Market",
+    "region": "Test Region",
+    "created_at": "2026-01-07T18:25:31.798975+00:00"
+  },
+  {
+    "market_id": "market_0082da979ce7",
+    "name_ar": "سوق الاختبار",
+    "name_en": "Test Market",
+    "region": "Test Region",
+    "created_at": "2026-01-07T18:44:53.557597+00:00"
+  }
+]

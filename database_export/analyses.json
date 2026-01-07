@@ -1,0 +1,28 @@
+[
+  {
+    "analysis_id": "analysis_364a372ffabe",
+    "asset_id": "asset_aramco",
+    "market_id": "market_gcc_mjydp7qm",
+    "bias": "صاعد",
+    "key_levels": "دعم: 100، مقاومة: 120",
+    "scenario_text": "سيناريو اختبار للتحليل",
+    "insight_text": "ملاحظات إضافية",
+    "risk_note": "تحذير من المخاطر",
+    "confidence_level": "High",
+    "updated_at": "2026-01-07T18:44:53.811637+00:00",
+    "created_by": "test-admin-1767811492"
+  },
+  {
+    "analysis_id": "analysis_2",
+    "asset_id": "asset_bist100",
+    "market_id": "market_istanbul_mjydp7qm",
+    "bias": "محايد",
+    "key_levels": "دعم: 9800 نقطة\nمقاومة: 10500 نقطة\nنطاق التداول: 10000-10300",
+    "scenario_text": "المؤشر يتحرك في نطاق عرضي بين مستويات 9800 و 10500. لا توجد إشارات واضحة للاتجاه حالياً. ننصح بالانتظار لحين اختراق أحد حدود النطاق.",
+    "insight_text": "الرسوم البيانية الشهرية تظهر تذبذباً واسعاً يتطلب المزيد من الوقت للتوضيح.",
+    "risk_note": null,
+    "confidence_level": "Medium",
+    "updated_at": "2026-01-03T14:08:55.951Z",
+    "created_by": "admin_mjydp7pv"
+  }
+]

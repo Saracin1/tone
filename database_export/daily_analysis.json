@@ -1,0 +1,80 @@
+[
+  {
+    "market": "GCC",
+    "instrument_code": "AAPL",
+    "analysis_price": "150.50",
+    "target_price": "175.00",
+    "insight_type": "Buy",
+    "analysis_datetime": "2026-01-07T18:33:32.748343+00:00",
+    "critical_level": "145.00",
+    "record_id": "daily_f85c053c23da",
+    "source": "test_data",
+    "created_at": "2026-01-07T18:33:32.748390+00:00",
+    "updated_at": "2026-01-07T18:33:32.748392+00:00"
+  },
+  {
+    "market": "GCC",
+    "instrument_code": "GOOGL",
+    "analysis_price": "2800.00",
+    "target_price": "3100.00",
+    "insight_type": "Buy",
+    "analysis_datetime": "2026-01-07T18:33:32.748358+00:00",
+    "critical_level": "2700.00",
+    "record_id": "daily_b0f452f206ca",
+    "source": "test_data",
+    "created_at": "2026-01-07T18:33:32.748397+00:00",
+    "updated_at": "2026-01-07T18:33:32.748398+00:00"
+  },
+  {
+    "market": "Istanbul",
+    "instrument_code": "THYAO",
+    "analysis_price": "45.30",
+    "target_price": "52.00",
+    "insight_type": "Buy",
+    "analysis_datetime": "2026-01-07T18:33:32.748360+00:00",
+    "critical_level": "42.00",
+    "record_id": "daily_e143f87e0381",
+    "source": "test_data",
+    "created_at": "2026-01-07T18:33:32.748402+00:00",
+    "updated_at": "2026-01-07T18:33:32.748403+00:00"
+  },
+  {
+    "market": "Istanbul",
+    "instrument_code": "GARAN",
+    "analysis_price": "12.80",
+    "target_price": "15.50",
+    "insight_type": "Buy",
+    "analysis_datetime": "2026-01-07T18:33:32.748362+00:00",
+    "critical_level": "11.50",
+    "record_id": "daily_2027b35731f1",
+    "source": "test_data",
+    "created_at": "2026-01-07T18:33:32.748411+00:00",
+    "updated_at": "2026-01-07T18:33:32.748412+00:00"
+  },
+  {
+    "market": "Cairo",
+    "instrument_code": "COMI",
+    "analysis_price": "85.00",
+    "target_price": "95.00",
+    "insight_type": "Hold",
+    "analysis_datetime": "2026-01-07T18:33:32.748365+00:00",
+    "critical_level": "80.00",
+    "record_id": "daily_b6fd566d1f58",
+    "source": "test_data",
+    "created_at": "2026-01-07T18:33:32.748416+00:00",
+    "updated_at": "2026-01-07T18:33:32.748417+00:00"
+  },
+  {
+    "market": "Cairo",
+    "instrument_code": "SWDY",
+    "analysis_price": "22.50",
+    "target_price": "28.00",
+    "insight_type": "Buy",
+    "analysis_datetime": "2026-01-07T18:33:32.748367+00:00",
+    "critical_level": "20.00",
+    "record_id": "daily_ef12ccbbe6f0",
+    "source": "test_data",
+    "created_at": "2026-01-07T18:33:32.748421+00:00",
+    "updated_at": "2026-01-07T18:33:32.748422+00:00"
+  }
+]

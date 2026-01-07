@@ -1,0 +1,58 @@
+[
+  {
+    "asset_id": "asset_aramco",
+    "market_id": "market_gcc_mjydp7qm",
+    "name_ar": "أرامكو السعودية",
+    "name_en": "Saudi Aramco",
+    "type": "stock",
+    "created_at": "2026-01-03T14:08:55.939Z"
+  },
+  {
+    "asset_id": "asset_sabic",
+    "market_id": "market_gcc_mjydp7qm",
+    "name_ar": "سابك",
+    "name_en": "SABIC",
+    "type": "stock",
+    "created_at": "2026-01-03T14:08:55.939Z"
+  },
+  {
+    "asset_id": "asset_bist100",
+    "market_id": "market_istanbul_mjydp7qm",
+    "name_ar": "مؤشر بورصة إسطنبول 100",
+    "name_en": "BIST 100 Index",
+    "type": "index",
+    "created_at": "2026-01-03T14:08:55.939Z"
+  },
+  {
+    "asset_id": "asset_egx30",
+    "market_id": "market_cairo_mjydp7qm",
+    "name_ar": "مؤشر EGX 30",
+    "name_en": "EGX 30 Index",
+    "type": "index",
+    "created_at": "2026-01-03T14:08:55.939Z"
+  },
+  {
+    "asset_id": "asset_c65604b19d14",
+    "market_id": "market_gcc_mjydp7qm",
+    "name_ar": "أصل الاختبار",
+    "name_en": "Test Asset",
+    "type": "stock",
+    "created_at": "2026-01-03T14:11:34.193208+00:00"
+  },
+  {
+    "asset_id": "asset_5deb3177940f",
+    "market_id": "market_gcc_mjydp7qm",
+    "name_ar": "أصل الاختبار",
+    "name_en": "Test Asset",
+    "type": "stock",
+    "created_at": "2026-01-07T18:25:31.931859+00:00"
+  },
+  {
+    "asset_id": "asset_cd4f8764439b",
+    "market_id": "market_gcc_mjydp7qm",
+    "name_ar": "أصل الاختبار",
+    "name_en": "Test Asset",
+    "type": "stock",
+    "created_at": "2026-01-07T18:44:53.680034+00:00"
+  }
+]

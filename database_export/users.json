@@ -1,0 +1,41 @@
+[
+  {
+    "user_id": "admin_mjydp7pv",
+    "email": "admin@alwaha.com",
+    "name": "مدير النظام",
+    "picture": "https://via.placeholder.com/150",
+    "created_at": "2026-01-03T14:08:55.892Z",
+    "access_level": "admin",
+    "google_user_id": "admin_mjydp7pv",
+    "subscription_end_date": "2027-01-07T17:15:18.811Z",
+    "subscription_start_date": "2026-01-07T17:15:18.811Z",
+    "subscription_status": "active",
+    "subscription_type": "Premium"
+  },
+  {
+    "user_id": "user_ddbed29f0a88",
+    "email": "fmukhlisov@gmail.com",
+    "name": "Mr. Sarasin",
+    "picture": "https://lh3.googleusercontent.com/a/ACg8ocIM0U318jxxxrujCDuO7m_PZV4XLzwStmSjfyZKD6IXg0RNwjmx=s96-c",
+    "created_at": "2026-01-03T14:09:20.816641+00:00",
+    "access_level": "admin",
+    "google_user_id": "user_ddbed29f0a88",
+    "subscription_end_date": "2027-01-07T17:40:01.842Z",
+    "subscription_start_date": "2026-01-07T17:40:01.842Z",
+    "subscription_status": "active",
+    "subscription_type": "Premium"
+  },
+  {
+    "user_id": "user_973457916d35",
+    "google_user_id": "115002299256692756830",
+    "email": "fmukhlisov@gmail.com",
+    "name": "Mr. Sarasin",
+    "picture": "https://lh3.googleusercontent.com/a/ACg8ocIM0U318jxxxrujCDuO7m_PZV4XLzwStmSjfyZKD6IXg0RNwjmx=s96-c",
+    "access_level": "Limited",
+    "subscription_type": null,
+    "subscription_status": "none",
+    "subscription_start_date": null,
+    "subscription_end_date": null,
+    "created_at": "2026-01-07T17:40:54.540890+00:00"
+  }
+]
