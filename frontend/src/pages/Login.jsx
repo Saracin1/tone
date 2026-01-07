@@ -20,7 +20,7 @@ export default function Login() {
         });
         if (response.ok) {
           const user = await response.json();
-          if (user.role === 'admin') {
+          if (user.access_level === 'admin') {
             navigate('/admin');
           } else {
             navigate('/dashboard');
