@@ -815,6 +815,314 @@ async def get_last_sync_time(request: Request):
         "last_sync": latest.get("updated_at") if latest else None
     }
 
+# ==================== HISTORY OF SUCCESS ENDPOINTS ====================
+
+@api_router.get("/history/forecasts")
+async def get_forecast_history(
+    request: Request, 
+    market: Optional[str] = None,
+    status: Optional[str] = None,
+    limit: int = 100
+):
+    """
+    Get all forecast history records. Read-only for credibility display.
+    """
+    user = await get_current_user(request)
+    
+    if not check_subscription_access(user):
+        raise HTTPException(status_code=403, detail="Active subscription required")
+    
+    query = {}
+    if market:
+        query["market"] = market
+    if status:
+        query["status"] = status
+    
+    forecasts = await db.forecast_history.find(
+        query, 
+        {"_id": 0}
+    ).sort("forecast_date", -1).limit(limit).to_list(limit)
+    
+    return forecasts
+
+@api_router.get("/history/performance")
+async def get_performance_data(request: Request):
+    """
+    Get aggregated performance data for bar charts.
+    Returns P/L percentage per instrument.
+    """
+    user = await get_current_user(request)
+    
+    if not check_subscription_access(user):
+        raise HTTPException(status_code=403, detail="Active subscription required")
+    
+    # Aggregate performance by instrument
+    pipeline = [
+        {"$match": {"status": {"$in": ["success", "failed"]}}},
+        {
+            "$group": {
+                "_id": {
+                    "market": "$market",
+                    "instrument": "$instrument_code"
+                },
+                "total_forecasts": {"$sum": 1},
+                "successful_forecasts": {
+                    "$sum": {"$cond": [{"$eq": ["$status", "success"]}, 1, 0]}
+                },
+                "total_pl_percent": {"$sum": "$calculated_pl_percent"},
+                "avg_pl_percent": {"$avg": "$calculated_pl_percent"}
+            }
+        },
+        {
+            "$project": {
+                "_id": 0,
+                "market": "$_id.market",
+                "instrument_code": "$_id.instrument",
+                "total_forecasts": 1,
+                "successful_forecasts": 1,
+                "win_rate": {
+                    "$multiply": [
+                        {"$divide": ["$successful_forecasts", "$total_forecasts"]},
+                        100
+                    ]
+                },
+                "total_pl_percent": {"$round": ["$total_pl_percent", 2]},
+                "avg_pl_percent": {"$round": ["$avg_pl_percent", 2]}
+            }
+        },
+        {"$sort": {"total_pl_percent": -1}}
+    ]
+    
+    results = await db.forecast_history.aggregate(pipeline).to_list(1000)
+    return results
+
+@api_router.get("/history/cumulative")
+async def get_cumulative_performance(request: Request):
+    """
+    Get cumulative performance over time for line chart.
+    """
+    user = await get_current_user(request)
+    
+    if not check_subscription_access(user):
+        raise HTTPException(status_code=403, detail="Active subscription required")
+    
+    # Get all completed forecasts sorted by date
+    pipeline = [
+        {"$match": {"status": {"$in": ["success", "failed"]}, "result_date": {"$ne": None}}},
+        {"$sort": {"result_date": 1}},
+        {
+            "$project": {
+                "_id": 0,
+                "result_date": 1,
+                "instrument_code": 1,
+                "market": 1,
+                "calculated_pl_percent": 1,
+                "status": 1
+            }
+        }
+    ]
+    
+    forecasts = await db.forecast_history.aggregate(pipeline).to_list(1000)
+    
+    # Calculate cumulative return
+    cumulative_data = []
+    cumulative_return = 0
+    total_trades = 0
+    winning_trades = 0
+    
+    for forecast in forecasts:
+        total_trades += 1
+        if forecast.get("status") == "success":
+            winning_trades += 1
+        
+        pl = forecast.get("calculated_pl_percent", 0) or 0
+        cumulative_return += pl
+        
+        cumulative_data.append({
+            "date": forecast.get("result_date", ""),
+            "instrument": forecast.get("instrument_code", ""),
+            "market": forecast.get("market", ""),
+            "pl_percent": round(pl, 2),
+            "cumulative_return": round(cumulative_return, 2),
+            "total_trades": total_trades,
+            "win_rate": round((winning_trades / total_trades) * 100, 2) if total_trades > 0 else 0
+        })
+    
+    return cumulative_data
+
+@api_router.get("/history/summary")
+async def get_history_summary(request: Request):
+    """
+    Get overall summary statistics for History of Success section.
+    """
+    user = await get_current_user(request)
+    
+    if not check_subscription_access(user):
+        raise HTTPException(status_code=403, detail="Active subscription required")
+    
+    # Get total counts
+    total_forecasts = await db.forecast_history.count_documents({})
+    completed_forecasts = await db.forecast_history.count_documents({"status": {"$in": ["success", "failed"]}})
+    successful_forecasts = await db.forecast_history.count_documents({"status": "success"})
+    pending_forecasts = await db.forecast_history.count_documents({"status": "pending"})
+    
+    # Calculate total and average P/L
+    pipeline = [
+        {"$match": {"status": {"$in": ["success", "failed"]}}},
+        {
+            "$group": {
+                "_id": None,
+                "total_pl": {"$sum": "$calculated_pl_percent"},
+                "avg_pl": {"$avg": "$calculated_pl_percent"},
+                "max_gain": {"$max": "$calculated_pl_percent"},
+                "max_loss": {"$min": "$calculated_pl_percent"}
+            }
+        }
+    ]
+    
+    stats = await db.forecast_history.aggregate(pipeline).to_list(1)
+    
+    summary = {
+        "total_forecasts": total_forecasts,
+        "completed_forecasts": completed_forecasts,
+        "successful_forecasts": successful_forecasts,
+        "pending_forecasts": pending_forecasts,
+        "win_rate": round((successful_forecasts / completed_forecasts) * 100, 2) if completed_forecasts > 0 else 0,
+        "total_return_percent": round(stats[0]["total_pl"], 2) if stats else 0,
+        "avg_return_percent": round(stats[0]["avg_pl"], 2) if stats else 0,
+        "best_trade_percent": round(stats[0]["max_gain"], 2) if stats and stats[0].get("max_gain") else 0,
+        "worst_trade_percent": round(stats[0]["max_loss"], 2) if stats and stats[0].get("max_loss") else 0
+    }
+    
+    return summary
+
+@api_router.get("/history/markets")
+async def get_history_markets(request: Request):
+    """
+    Get list of markets with forecast history.
+    """
+    user = await get_current_user(request)
+    
+    markets = await db.forecast_history.distinct("market")
+    return {"markets": markets}
+
+# Admin endpoints for managing forecast history
+@api_router.post("/admin/history/forecast")
+async def create_forecast(forecast: ForecastCreate, request: Request):
+    """
+    Admin: Create a new forecast record.
+    """
+    user = await get_current_user(request)
+    if user.access_level != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    now = datetime.now(timezone.utc).isoformat()
+    
+    # Calculate P/L if actual result is provided
+    calculated_pl = None
+    status = "pending"
+    
+    if forecast.actual_result_price is not None and forecast.result_date:
+        if forecast.forecast_direction == "Bullish":
+            calculated_pl = ((forecast.actual_result_price - forecast.entry_price) / forecast.entry_price) * 100
+            status = "success" if forecast.actual_result_price >= forecast.forecast_target_price else "failed"
+        else:  # Bearish
+            calculated_pl = ((forecast.entry_price - forecast.actual_result_price) / forecast.entry_price) * 100
+            status = "success" if forecast.actual_result_price <= forecast.forecast_target_price else "failed"
+    
+    forecast_doc = {
+        "record_id": f"forecast_{uuid.uuid4().hex[:12]}",
+        "instrument_code": forecast.instrument_code,
+        "market": forecast.market,
+        "forecast_date": forecast.forecast_date,
+        "forecast_direction": forecast.forecast_direction,
+        "entry_price": forecast.entry_price,
+        "forecast_target_price": forecast.forecast_target_price,
+        "actual_result_price": forecast.actual_result_price,
+        "result_date": forecast.result_date,
+        "calculated_pl_percent": round(calculated_pl, 2) if calculated_pl is not None else None,
+        "status": status,
+        "notes": forecast.notes,
+        "created_at": now,
+        "updated_at": now
+    }
+    
+    await db.forecast_history.insert_one(forecast_doc)
+    return ForecastHistory(**forecast_doc)
+
+@api_router.put("/admin/history/forecast/{record_id}")
+async def update_forecast_result(record_id: str, update: ForecastUpdate, request: Request):
+    """
+    Admin: Update forecast with actual result.
+    """
+    user = await get_current_user(request)
+    if user.access_level != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    existing = await db.forecast_history.find_one({"record_id": record_id}, {"_id": 0})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Forecast not found")
+    
+    # Calculate P/L based on direction
+    entry_price = existing["entry_price"]
+    target_price = existing["forecast_target_price"]
+    direction = existing["forecast_direction"]
+    
+    if direction == "Bullish":
+        calculated_pl = ((update.actual_result_price - entry_price) / entry_price) * 100
+        status = "success" if update.actual_result_price >= target_price else "failed"
+    else:  # Bearish
+        calculated_pl = ((entry_price - update.actual_result_price) / entry_price) * 100
+        status = "success" if update.actual_result_price <= target_price else "failed"
+    
+    update_doc = {
+        "actual_result_price": update.actual_result_price,
+        "result_date": update.result_date,
+        "calculated_pl_percent": round(calculated_pl, 2),
+        "status": status,
+        "notes": update.notes if update.notes else existing.get("notes"),
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.forecast_history.update_one(
+        {"record_id": record_id},
+        {"$set": update_doc}
+    )
+    
+    updated = await db.forecast_history.find_one({"record_id": record_id}, {"_id": 0})
+    return ForecastHistory(**updated)
+
+@api_router.delete("/admin/history/forecast/{record_id}")
+async def delete_forecast(record_id: str, request: Request):
+    """
+    Admin: Delete a forecast record.
+    """
+    user = await get_current_user(request)
+    if user.access_level != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    result = await db.forecast_history.delete_one({"record_id": record_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Forecast not found")
+    
+    return {"message": "Forecast deleted successfully"}
+
+@api_router.get("/admin/history/forecasts")
+async def admin_get_all_forecasts(request: Request, limit: int = 500):
+    """
+    Admin: Get all forecasts for management.
+    """
+    user = await get_current_user(request)
+    if user.access_level != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    forecasts = await db.forecast_history.find(
+        {}, 
+        {"_id": 0}
+    ).sort("forecast_date", -1).limit(limit).to_list(limit)
+    
+    return forecasts
+
 app.include_router(api_router)
 
 app.add_middleware(
