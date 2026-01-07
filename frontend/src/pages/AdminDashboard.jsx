@@ -453,6 +453,129 @@ export default function AdminDashboard() {
               </CardContent>
             </Card>
           </TabsContent>
+
+          <TabsContent value="users">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Plus className="w-5 h-5" />
+                    {t('manageSubscription')}
+                  </CardTitle>
+                  <CardDescription>{t('activateSubscription')}, {t('extendSubscription')}, {t('giftSubscription')}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handleManageSubscription} className="space-y-4">
+                    <div>
+                      <Label htmlFor="user_email">{t('selectUser')}</Label>
+                      <select
+                        id="user_email"
+                        name="user_email"
+                        required
+                        className={`w-full px-3 py-2 border border-input rounded-md bg-background ${language === 'ar' ? 'text-right' : ''}`}
+                        onChange={(e) => setSelectedUser(users.find(u => u.email === e.target.value))}
+                      >
+                        <option value="">{t('selectUser')}</option>
+                        {users.map((user) => (
+                          <option key={user.user_id} value={user.email}>
+                            {user.email} - {user.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {selectedUser && (
+                      <div className="p-3 bg-muted rounded-lg text-sm space-y-1">
+                        <p><strong>{t('subscriptionStatus')}:</strong> {selectedUser.subscription_status || t('none')}</p>
+                        <p><strong>{t('subscriptionType')}:</strong> {selectedUser.subscription_type || t('none')}</p>
+                        {selectedUser.subscription_end_date && (
+                          <p><strong>{t('expiresOn')}:</strong> {new Date(selectedUser.subscription_end_date).toLocaleDateString(language === 'ar' ? 'ar-SA' : 'en-US')}</p>
+                        )}
+                      </div>
+                    )}
+
+                    <div>
+                      <Label htmlFor="subscription_type_admin">{t('selectSubscriptionType')}</Label>
+                      <select
+                        id="subscription_type_admin"
+                        name="subscription_type"
+                        required
+                        className={`w-full px-3 py-2 border border-input rounded-md bg-background ${language === 'ar' ? 'text-right' : ''}`}
+                      >
+                        <option value="Beginner">{t('beginner')}</option>
+                        <option value="Advanced">{t('advanced')}</option>
+                        <option value="Premium">{t('premium')}</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="duration_days">{t('durationDays')}</Label>
+                      <Input id="duration_days" name="duration_days" type="number" required min="1" defaultValue="30" className={language === 'ar' ? 'text-right' : ''} />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="action_type">{t('action')}</Label>
+                      <select
+                        id="action_type"
+                        name="action"
+                        required
+                        className={`w-full px-3 py-2 border border-input rounded-md bg-background ${language === 'ar' ? 'text-right' : ''}`}
+                      >
+                        <option value="activate">{t('activate')} - {language === 'ar' ? 'تفعيل جديد' : 'New activation'}</option>
+                        <option value="extend">{t('extend')} - {language === 'ar' ? 'إضافة مدة للاشتراك الحالي' : 'Add to existing'}</option>
+                        <option value="gift">{t('gift')} - {language === 'ar' ? 'هدية اشتراك' : 'Gift subscription'}</option>
+                        <option value="deactivate">{t('deactivate')} - {language === 'ar' ? 'إلغاء فوري' : 'Cancel immediately'}</option>
+                      </select>
+                    </div>
+
+                    <Button type="submit" className="w-full" data-testid="manage-subscription-button">
+                      {t('apply')}
+                    </Button>
+                  </form>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>{t('allUsers')}</CardTitle>
+                  <CardDescription>{t('usersList')}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3 max-h-[600px] overflow-y-auto" data-testid="users-list">
+                    {users.length === 0 ? (
+                      <p className="text-muted-foreground text-center py-8">{language === 'ar' ? 'لا يوجد مستخدمين' : 'No users yet'}</p>
+                    ) : (
+                      users.map((user) => (
+                        <div key={user.user_id} className="p-4 border border-border rounded-lg space-y-2">
+                          <div className="flex items-center justify-between">
+                            <h3 className="font-semibold text-foreground">{user.name}</h3>
+                            {user.subscription_status === 'active' ? (
+                              <span className="px-2 py-1 text-xs rounded-full bg-primary/10 text-primary">{t('active')}</span>
+                            ) : user.subscription_status === 'expired' ? (
+                              <span className="px-2 py-1 text-xs rounded-full bg-destructive/10 text-destructive">{t('expired')}</span>
+                            ) : (
+                              <span className="px-2 py-1 text-xs rounded-full bg-muted text-muted-foreground">{t('none')}</span>
+                            )}
+                          </div>
+                          <p className="text-sm text-muted-foreground">{user.email}</p>
+                          {user.subscription_type && (
+                            <p className="text-xs text-muted-foreground">
+                              {t('subscriptionType')}: <strong>{user.subscription_type}</strong>
+                            </p>
+                          )}
+                          {user.subscription_end_date && (
+                            <p className="text-xs text-muted-foreground">
+                              {t('expiresOn')}: {new Date(user.subscription_end_date).toLocaleDateString(language === 'ar' ? 'ar-SA' : 'en-US')}
+                            </p>
+                          )}
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
         </Tabs>
       </main>
     </div>
