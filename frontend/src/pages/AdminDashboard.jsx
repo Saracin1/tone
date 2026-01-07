@@ -765,6 +765,245 @@ export default function AdminDashboard() {
             </div>
           </TabsContent>
 
+          {/* Forecasts Tab - History of Success Management */}
+          <TabsContent value="forecasts">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Create/Update Forecast Form */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    {editingForecast ? <Edit2 className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
+                    {editingForecast 
+                      ? (language === 'ar' ? 'تحديث نتيجة التوقع' : 'Update Forecast Result')
+                      : (language === 'ar' ? 'إنشاء توقع جديد' : 'Create New Forecast')
+                    }
+                  </CardTitle>
+                  <CardDescription>
+                    {editingForecast
+                      ? (language === 'ar' ? 'أدخل النتيجة الفعلية للتوقع' : 'Enter the actual result for the forecast')
+                      : (language === 'ar' ? 'أضف توقع جديد لسجل النجاح' : 'Add a new forecast to the success history')
+                    }
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {editingForecast ? (
+                    <form onSubmit={handleUpdateForecastResult} className="space-y-4">
+                      <div className="p-3 bg-muted rounded-lg text-sm space-y-1 mb-4">
+                        <p><strong>{language === 'ar' ? 'الأداة' : 'Instrument'}:</strong> {editingForecast.instrument_code}</p>
+                        <p><strong>{language === 'ar' ? 'السوق' : 'Market'}:</strong> {editingForecast.market}</p>
+                        <p><strong>{language === 'ar' ? 'الاتجاه' : 'Direction'}:</strong> 
+                          <span className={editingForecast.forecast_direction === 'Bullish' ? 'text-green-600 ml-1' : 'text-red-600 ml-1'}>
+                            {editingForecast.forecast_direction}
+                          </span>
+                        </p>
+                        <p><strong>{language === 'ar' ? 'سعر الدخول' : 'Entry Price'}:</strong> {editingForecast.entry_price}</p>
+                        <p><strong>{language === 'ar' ? 'السعر المستهدف' : 'Target Price'}:</strong> {editingForecast.forecast_target_price}</p>
+                      </div>
+
+                      <div>
+                        <Label htmlFor="actual_result_price">{language === 'ar' ? 'السعر الفعلي' : 'Actual Result Price'} *</Label>
+                        <Input 
+                          id="actual_result_price" 
+                          name="actual_result_price" 
+                          type="number" 
+                          step="0.01"
+                          required 
+                        />
+                      </div>
+
+                      <div>
+                        <Label htmlFor="result_date">{language === 'ar' ? 'تاريخ النتيجة' : 'Result Date'} *</Label>
+                        <Input 
+                          id="result_date" 
+                          name="result_date" 
+                          type="date" 
+                          required 
+                          defaultValue={new Date().toISOString().split('T')[0]}
+                        />
+                      </div>
+
+                      <div>
+                        <Label htmlFor="update_notes">{language === 'ar' ? 'ملاحظات' : 'Notes'}</Label>
+                        <Textarea id="update_notes" name="notes" defaultValue={editingForecast.notes || ''} />
+                      </div>
+
+                      <div className="flex gap-2">
+                        <Button type="submit" className="flex-1">
+                          {language === 'ar' ? 'حفظ النتيجة' : 'Save Result'}
+                        </Button>
+                        <Button type="button" variant="outline" onClick={() => setEditingForecast(null)}>
+                          {language === 'ar' ? 'إلغاء' : 'Cancel'}
+                        </Button>
+                      </div>
+                    </form>
+                  ) : (
+                    <form onSubmit={handleCreateForecast} className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="instrument_code">{language === 'ar' ? 'رمز الأداة' : 'Instrument Code'} *</Label>
+                          <Input id="instrument_code" name="instrument_code" required placeholder="e.g., AAPL" />
+                        </div>
+                        <div>
+                          <Label htmlFor="forecast_market">{language === 'ar' ? 'السوق' : 'Market'} *</Label>
+                          <Input id="forecast_market" name="market" required placeholder="e.g., GCC" />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="forecast_date">{language === 'ar' ? 'تاريخ التوقع' : 'Forecast Date'} *</Label>
+                          <Input 
+                            id="forecast_date" 
+                            name="forecast_date" 
+                            type="date" 
+                            required 
+                            defaultValue={new Date().toISOString().split('T')[0]}
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="forecast_direction">{language === 'ar' ? 'الاتجاه' : 'Direction'} *</Label>
+                          <select
+                            id="forecast_direction"
+                            name="forecast_direction"
+                            required
+                            className="w-full px-3 py-2 border border-input rounded-md bg-background"
+                          >
+                            <option value="Bullish">{language === 'ar' ? 'صعودي (شراء)' : 'Bullish (Buy)'}</option>
+                            <option value="Bearish">{language === 'ar' ? 'هبوطي (بيع)' : 'Bearish (Sell)'}</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="entry_price">{language === 'ar' ? 'سعر الدخول' : 'Entry Price'} *</Label>
+                          <Input id="entry_price" name="entry_price" type="number" step="0.01" required />
+                        </div>
+                        <div>
+                          <Label htmlFor="forecast_target_price">{language === 'ar' ? 'السعر المستهدف' : 'Target Price'} *</Label>
+                          <Input id="forecast_target_price" name="forecast_target_price" type="number" step="0.01" required />
+                        </div>
+                      </div>
+
+                      <div className="border-t pt-4">
+                        <p className="text-sm text-muted-foreground mb-3">
+                          {language === 'ar' ? 'اختياري: أضف النتيجة الفعلية إذا كانت متوفرة' : 'Optional: Add actual result if available'}
+                        </p>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label htmlFor="actual_result_price_create">{language === 'ar' ? 'السعر الفعلي' : 'Actual Result Price'}</Label>
+                            <Input id="actual_result_price_create" name="actual_result_price" type="number" step="0.01" />
+                          </div>
+                          <div>
+                            <Label htmlFor="result_date_create">{language === 'ar' ? 'تاريخ النتيجة' : 'Result Date'}</Label>
+                            <Input id="result_date_create" name="result_date" type="date" />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <Label htmlFor="forecast_notes">{language === 'ar' ? 'ملاحظات' : 'Notes'}</Label>
+                        <Textarea id="forecast_notes" name="notes" placeholder={language === 'ar' ? 'أي ملاحظات إضافية...' : 'Any additional notes...'} />
+                      </div>
+
+                      <Button type="submit" className="w-full">
+                        <Plus className="w-4 h-4 mr-2" />
+                        {language === 'ar' ? 'إنشاء التوقع' : 'Create Forecast'}
+                      </Button>
+                    </form>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Forecasts List */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Trophy className="w-5 h-5 text-yellow-500" />
+                    {language === 'ar' ? 'سجل التوقعات' : 'Forecast History'}
+                  </CardTitle>
+                  <CardDescription>
+                    {language === 'ar' ? 'جميع التوقعات المسجلة' : 'All recorded forecasts'}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3 max-h-[600px] overflow-y-auto">
+                    {forecasts.length === 0 ? (
+                      <p className="text-muted-foreground text-center py-8">
+                        {language === 'ar' ? 'لا توجد توقعات مسجلة بعد' : 'No forecasts recorded yet'}
+                      </p>
+                    ) : (
+                      forecasts.map((forecast) => (
+                        <div key={forecast.record_id} className="p-4 border border-border rounded-lg space-y-2">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <h3 className="font-semibold text-foreground">{forecast.instrument_code}</h3>
+                              <span className={`flex items-center text-sm ${forecast.forecast_direction === 'Bullish' ? 'text-green-600' : 'text-red-600'}`}>
+                                {forecast.forecast_direction === 'Bullish' 
+                                  ? <TrendingUp className="w-4 h-4 mr-1" />
+                                  : <TrendingDown className="w-4 h-4 mr-1" />
+                                }
+                                {forecast.forecast_direction}
+                              </span>
+                            </div>
+                            <Badge className={
+                              forecast.status === 'success' ? 'bg-green-100 text-green-800' :
+                              forecast.status === 'failed' ? 'bg-red-100 text-red-800' :
+                              'bg-yellow-100 text-yellow-800'
+                            }>
+                              {forecast.status === 'success' 
+                                ? (language === 'ar' ? 'ناجح' : 'Success')
+                                : forecast.status === 'failed'
+                                  ? (language === 'ar' ? 'فاشل' : 'Failed')
+                                  : (language === 'ar' ? 'قيد الانتظار' : 'Pending')
+                              }
+                            </Badge>
+                          </div>
+                          
+                          <div className="text-sm text-muted-foreground grid grid-cols-2 gap-2">
+                            <p>{language === 'ar' ? 'السوق' : 'Market'}: {forecast.market}</p>
+                            <p>{language === 'ar' ? 'التاريخ' : 'Date'}: {formatDate(forecast.forecast_date)}</p>
+                            <p>{language === 'ar' ? 'سعر الدخول' : 'Entry'}: {forecast.entry_price}</p>
+                            <p>{language === 'ar' ? 'الهدف' : 'Target'}: {forecast.forecast_target_price}</p>
+                            {forecast.actual_result_price && (
+                              <p>{language === 'ar' ? 'النتيجة' : 'Result'}: {forecast.actual_result_price}</p>
+                            )}
+                            {forecast.calculated_pl_percent !== null && (
+                              <p className={`font-semibold ${forecast.calculated_pl_percent >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                P/L: {forecast.calculated_pl_percent >= 0 ? '+' : ''}{forecast.calculated_pl_percent}%
+                              </p>
+                            )}
+                          </div>
+
+                          <div className="flex gap-2 pt-2 border-t border-border/50">
+                            {forecast.status === 'pending' && (
+                              <Button 
+                                size="sm" 
+                                variant="outline" 
+                                onClick={() => setEditingForecast(forecast)}
+                                className="flex-1"
+                              >
+                                <Edit2 className="w-4 h-4 mr-1" />
+                                {language === 'ar' ? 'تحديث النتيجة' : 'Update Result'}
+                              </Button>
+                            )}
+                            <Button 
+                              size="sm" 
+                              variant="destructive" 
+                              onClick={() => handleDeleteForecast(forecast.record_id)}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
           <TabsContent value="users">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card>
