@@ -225,8 +225,8 @@ async def get_assets(market_id: Optional[str] = None):
 @api_router.post("/assets", response_model=Asset)
 async def create_asset(asset: AssetCreate, request: Request):
     user = await get_current_user(request)
-    if user.role != "admin":
-        raise HTTPException(status_code=403, detail="Admin only")
+    if user.access_level != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
     
     asset_id = f"asset_{uuid.uuid4().hex[:12]}"
     asset_doc = {
