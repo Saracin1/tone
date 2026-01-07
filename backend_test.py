@@ -740,10 +740,19 @@ class FinancialDashboardTester:
             var deletedAdmins = db.users.deleteMany({email: /test\\.admin\\./});
             var deletedAdminSessions = db.user_sessions.deleteMany({session_token: /test_admin_session/});
             
+            // Clean up test forecast data
+            var deletedForecasts = db.forecast_history.deleteMany({
+                $or: [
+                    {instrument_code: /TEST_/},
+                    {record_id: /forecast_test_/}
+                ]
+            });
+            
             print('Deleted users: ' + deletedUsers.deletedCount);
             print('Deleted sessions: ' + deletedSessions.deletedCount);
             print('Deleted admins: ' + deletedAdmins.deletedCount);
             print('Deleted admin sessions: ' + deletedAdminSessions.deletedCount);
+            print('Deleted test forecasts: ' + deletedForecasts.deletedCount);
             """
             
             result = subprocess.run(['mongosh', '--eval', mongo_script], 
