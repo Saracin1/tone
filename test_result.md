@@ -101,3 +101,86 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: "User requested a dual-line chart comparing Analysis Price vs Target Price for all instruments from Google Sheet data, with auto-refresh functionality. Both Pie and Line charts should appear on the User Dashboard."
+
+backend:
+  - task: "Line chart data endpoint"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Created /api/daily-analysis/line-chart-data endpoint that returns analysis_price vs target_price data for all instruments"
+
+  - task: "Last sync timestamp endpoint"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Created /api/daily-analysis/last-sync endpoint to enable auto-refresh detection"
+
+frontend:
+  - task: "Line Chart component"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/AnalysisPriceLineChart.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Created AnalysisPriceLineChart.jsx with dual-line chart (blue=Analysis Price, green=Target Price), Swiss-style design, auto-refresh every 30 seconds"
+
+  - task: "Updated Pie Chart with auto-refresh"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/AnalysisPriceChart.jsx"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added auto-refresh functionality to existing Pie Chart component"
+
+  - task: "Dashboard charts integration"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/UserDashboard.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Integrated both Line and Pie charts into UserDashboard with tabs. Charts display on dashboard when no asset is selected."
+
+metadata:
+  created_by: "main_agent"
+  version: "1.0"
+  test_sequence: 1
+  run_ui: true
+
+test_plan:
+  current_focus:
+    - "Line Chart component"
+    - "Dashboard charts integration"
+    - "Line chart data endpoint"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "main"
+    message: "Implemented dual-line chart feature with the following: 1) Backend endpoint /api/daily-analysis/line-chart-data returns analysis_price vs target_price for all instruments, 2) New AnalysisPriceLineChart.jsx component with Swiss-style colors (blue and green), 3) Both charts integrated into UserDashboard with tabs, 4) Auto-refresh polls every 30 seconds. NOTE: No daily_analysis data exists in DB yet - charts will show 'No data to display'. Please test: a) Backend endpoints respond correctly, b) Frontend components render without errors, c) Charts display properly after login (will show no data message until admin syncs from Google Sheets)."
