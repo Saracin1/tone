@@ -24,10 +24,11 @@ api_router = APIRouter(prefix="/api")
 class User(BaseModel):
     model_config = ConfigDict(extra="ignore")
     user_id: str
+    google_user_id: str
     email: str
     name: str
     picture: str
-    role: str = "user"
+    access_level: str = "Limited"
     created_at: str
 
 class SessionData(BaseModel):
