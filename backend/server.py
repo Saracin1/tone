@@ -119,7 +119,45 @@ async def get_current_user(request: Request) -> Optional[User]:
     if not user_doc:
         raise HTTPException(status_code=401, detail="User not found")
     
-    return User(**user_doc)
+    user = User(**user_doc)
+    
+    if user.subscription_end_date:
+        end_date = datetime.fromisoformat(user.subscription_end_date)
+        if end_date.tzinfo is None:
+            end_date = end_date.replace(tzinfo=timezone.utc)
+        
+        now = datetime.now(timezone.utc)
+        if now > end_date and user.subscription_status == "active":
+            await db.users.update_one(
+                {"user_id": user.user_id},
+                {"$set": {"subscription_status": "expired"}}
+            )
+            user.subscription_status = "expired"
+    
+    return user
+
+def check_subscription_access(user: User, required_access: str = "any") -> bool:
+    if user.access_level == "admin":
+        return True
+    
+    if user.subscription_status != "active":
+        return False
+    
+    if user.subscription_end_date:
+        end_date = datetime.fromisoformat(user.subscription_end_date)
+        if end_date.tzinfo is None:
+            end_date = end_date.replace(tzinfo=timezone.utc)
+        if datetime.now(timezone.utc) > end_date:
+            return False
+    
+    if required_access == "any":
+        return True
+    
+    subscription_hierarchy = {"Beginner": 1, "Advanced": 2, "Premium": 3}
+    user_level = subscription_hierarchy.get(user.subscription_type, 0)
+    required_level = subscription_hierarchy.get(required_access, 0)
+    
+    return user_level >= required_level
 
 @api_router.post("/auth/session")
 async def create_session(request: Request, response: Response):
