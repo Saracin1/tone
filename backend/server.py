@@ -121,6 +121,40 @@ class SyncResult(BaseModel):
     skipped: int
     errors: List[str]
 
+# History of Success Models
+class ForecastHistory(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    record_id: str
+    instrument_code: str
+    market: str
+    forecast_date: str
+    forecast_direction: str  # "Bullish" or "Bearish"
+    entry_price: float
+    forecast_target_price: float
+    actual_result_price: Optional[float] = None
+    result_date: Optional[str] = None
+    calculated_pl_percent: Optional[float] = None
+    status: str = "pending"  # "success", "failed", "pending"
+    notes: Optional[str] = None
+    created_at: str
+    updated_at: str
+
+class ForecastCreate(BaseModel):
+    instrument_code: str
+    market: str
+    forecast_date: str
+    forecast_direction: str
+    entry_price: float
+    forecast_target_price: float
+    actual_result_price: Optional[float] = None
+    result_date: Optional[str] = None
+    notes: Optional[str] = None
+
+class ForecastUpdate(BaseModel):
+    actual_result_price: float
+    result_date: str
+    notes: Optional[str] = None
+
 async def get_current_user(request: Request) -> Optional[User]:
     session_token = request.cookies.get("session_token")
     if not session_token:
