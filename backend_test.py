@@ -90,13 +90,18 @@ class FinancialDashboardTester:
             var sessionToken = '{session_token}';
             var email = '{email}';
             
-            // Insert test user
+            // Insert test user with Premium subscription
             db.users.insertOne({{
               user_id: userId,
+              google_user_id: 'google_' + userId,
               email: email,
               name: 'Test User',
               picture: 'https://via.placeholder.com/150',
-              role: 'user',
+              access_level: 'Limited',
+              subscription_type: 'Premium',
+              subscription_status: 'active',
+              subscription_start_date: new Date().toISOString(),
+              subscription_end_date: new Date(Date.now() + 30*24*60*60*1000).toISOString(),
               created_at: new Date().toISOString()
             }});
             
