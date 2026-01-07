@@ -1,15 +1,18 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { LogOut, ChevronDown, ChevronLeft } from 'lucide-react';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 export default function UserDashboard() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t, language } = useLanguage();
   const [user, setUser] = useState(location.state?.user || null);
   const [isAuthenticated, setIsAuthenticated] = useState(location.state?.user ? true : null);
   const [markets, setMarkets] = useState([]);
@@ -119,18 +122,19 @@ export default function UserDashboard() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">جاري التحميل...</p>
+          <p className="mt-4 text-muted-foreground">{t('loading')}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background" dir="rtl">
+    <div className="min-h-screen bg-background" dir={language === 'ar' ? 'rtl' : 'ltr'}>
       <header className="border-b border-border/50 bg-card/50 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-foreground">الواحة المالية</h1>
+          <h1 className="text-2xl font-bold text-foreground">{t('appName')}</h1>
           <div className="flex items-center gap-4">
+            <LanguageSwitcher />
             <span className="text-sm text-muted-foreground">{user?.name}</span>
             <Button
               onClick={handleLogout}
@@ -140,20 +144,20 @@ export default function UserDashboard() {
               data-testid="logout-button"
             >
               <LogOut className="w-4 h-4" />
-              تسجيل الخروج
+              {t('logout')}
             </Button>
           </div>
         </div>
       </header>
 
       <div className="grid grid-cols-12 gap-4 p-4 h-[calc(100vh-80px)]">
-        <div className="col-span-12 lg:col-span-2 hidden lg:flex flex-col border-l border-border/50 bg-card/50 backdrop-blur-sm rounded-lg overflow-hidden">
+        <div className={`col-span-12 lg:col-span-2 hidden lg:flex flex-col ${language === 'ar' ? 'border-l' : 'border-r'} border-border/50 bg-card/50 backdrop-blur-sm rounded-lg overflow-hidden`}>
           <div 
             className="absolute inset-0 opacity-[0.03] pointer-events-none bg-repeat mix-blend-multiply"
             style={{ backgroundImage: "url('https://images.unsplash.com/photo-1739994885957-add0b729f051?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Nzd8MHwxfHNlYXJjaHwxfHxpc2xhbWljJTIwZ2VvbWV0cmljJTIwcGF0dGVybiUyMHNlYW1sZXNzJTIwYmVpZ2V8ZW58MHx8fHwxNzY3NDQ5MDU2fDA&ixlib=rb-4.1.0&q=85')" }}
           ></div>
           <div className="p-4 border-b border-border/50">
-            <h2 className="text-lg font-semibold text-foreground">الأسواق</h2>
+            <h2 className="text-lg font-semibold text-foreground">{t('markets')}</h2>
           </div>
           <ScrollArea className="flex-1 relative z-10" data-testid="markets-navigation">
             <div className="p-2 space-y-2">
@@ -164,29 +168,29 @@ export default function UserDashboard() {
                   <div key={market.market_id}>
                     <button
                       onClick={() => toggleMarket(market.market_id)}
-                      className="w-full text-right p-3 hover:bg-accent/50 rounded-lg transition-colors flex items-center justify-between"
+                      className={`w-full p-3 hover:bg-accent/50 rounded-lg transition-colors flex items-center justify-between ${language === 'ar' ? 'text-right' : 'text-left'}`}
                       data-testid={`market-${market.market_id}`}
                     >
-                      <span className="font-medium text-foreground">{market.name_ar}</span>
-                      {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+                      <span className="font-medium text-foreground">{language === 'ar' ? market.name_ar : market.name_en}</span>
+                      {isExpanded ? <ChevronDown className="w-4 h-4" /> : (language === 'ar' ? <ChevronLeft className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4 rotate-180" />)}
                     </button>
                     {isExpanded && (
-                      <div className="mr-4 space-y-1">
+                      <div className={`space-y-1 ${language === 'ar' ? 'mr-4' : 'ml-4'}`}>
                         {marketAssets.length === 0 ? (
-                          <p className="text-xs text-muted-foreground p-2">لا توجد أصول</p>
+                          <p className="text-xs text-muted-foreground p-2">{t('noAssets')}</p>
                         ) : (
                           marketAssets.map((asset) => (
                             <button
                               key={asset.asset_id}
                               onClick={() => handleAssetClick(asset)}
-                              className={`w-full text-right p-2 rounded-lg transition-colors text-sm ${
+                              className={`w-full p-2 rounded-lg transition-colors text-sm ${language === 'ar' ? 'text-right' : 'text-left'} ${
                                 selectedAsset?.asset_id === asset.asset_id
                                   ? 'bg-primary text-primary-foreground'
                                   : 'hover:bg-accent/50 text-muted-foreground'
                               }`}
                               data-testid={`asset-${asset.asset_id}`}
                             >
-                              {asset.name_ar}
+                              {language === 'ar' ? asset.name_ar : asset.name_en}
                             </button>
                           ))
                         )}
@@ -209,84 +213,84 @@ export default function UserDashboard() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                     </svg>
                   </div>
-                  <h2 className="text-2xl font-bold text-foreground mb-2">مرحباً بك في الواحة المالية</h2>
-                  <p className="text-muted-foreground">اختر أصلاً من القائمة لعرض التحليل</p>
+                  <h2 className="text-2xl font-bold text-foreground mb-2">{t('welcome')}</h2>
+                  <p className="text-muted-foreground">{t('selectAssetToView')}</p>
                 </div>
               </div>
             ) : !analysis ? (
               <div className="h-full flex items-center justify-center">
                 <div className="text-center">
-                  <h2 className="text-xl font-bold text-foreground mb-2">{selectedAsset.name_ar}</h2>
-                  <p className="text-muted-foreground">لا يوجد تحليل متاح لهذا الأصل حالياً</p>
+                  <h2 className="text-xl font-bold text-foreground mb-2">{language === 'ar' ? selectedAsset.name_ar : selectedAsset.name_en}</h2>
+                  <p className="text-muted-foreground">{t('noAnalysis')}</p>
                 </div>
               </div>
             ) : (
               <div className="space-y-6">
                 <div>
-                  <h1 className="text-4xl font-bold text-foreground mb-2">{selectedAsset.name_ar}</h1>
-                  <p className="text-lg text-muted-foreground">{selectedAsset.name_en}</p>
+                  <h1 className="text-4xl font-bold text-foreground mb-2">{language === 'ar' ? selectedAsset.name_ar : selectedAsset.name_en}</h1>
+                  <p className="text-lg text-muted-foreground">{language === 'ar' ? selectedAsset.name_en : selectedAsset.name_ar}</p>
                 </div>
 
                 <Card className="p-6 bg-gradient-to-br from-primary/10 to-secondary/10 border-primary/20">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-muted-foreground mb-1">التوجه</p>
+                      <p className="text-sm text-muted-foreground mb-1">{t('direction')}</p>
                       <p className="text-3xl font-bold text-primary">{analysis.bias}</p>
                     </div>
-                    <div className="text-left">
-                      <p className="text-sm text-muted-foreground mb-1">مستوى الثقة</p>
+                    <div className={language === 'ar' ? 'text-left' : 'text-right'}>
+                      <p className="text-sm text-muted-foreground mb-1">{t('confidence')}</p>
                       <p className="text-xl font-semibold text-foreground">{analysis.confidence_level}</p>
                     </div>
                   </div>
                 </Card>
 
                 <div>
-                  <h2 className="text-2xl font-semibold text-foreground mb-3">المستويات الرئيسية</h2>
+                  <h2 className="text-2xl font-semibold text-foreground mb-3">{t('keyLevelsTitle')}</h2>
                   <Card className="p-6">
                     <p className="text-lg text-foreground whitespace-pre-wrap leading-relaxed">{analysis.key_levels}</p>
                   </Card>
                 </div>
 
                 <div>
-                  <h2 className="text-2xl font-semibold text-foreground mb-3">السيناريو المتوقع</h2>
+                  <h2 className="text-2xl font-semibold text-foreground mb-3">{t('scenarioTitle')}</h2>
                   <Card className="p-6">
                     <p className="text-base text-foreground whitespace-pre-wrap leading-relaxed">{analysis.scenario_text}</p>
                   </Card>
                 </div>
 
-                <div className="text-xs text-muted-foreground text-left">
-                  آخر تحديث: {new Date(analysis.updated_at).toLocaleString('ar-SA')}
+                <div className={`text-xs text-muted-foreground ${language === 'ar' ? 'text-left' : 'text-right'}`}>
+                  {t('lastUpdated')}: {new Date(analysis.updated_at).toLocaleString(language === 'ar' ? 'ar-SA' : 'en-US')}
                 </div>
               </div>
             )}
           </div>
         </div>
 
-        <div className="col-span-3 hidden lg:flex flex-col border-r border-border/50 bg-card/50 backdrop-blur-sm rounded-lg overflow-hidden">
+        <div className={`col-span-3 hidden lg:flex flex-col ${language === 'ar' ? 'border-r' : 'border-l'} border-border/50 bg-card/50 backdrop-blur-sm rounded-lg overflow-hidden`}>
           <div 
             className="absolute inset-0 opacity-[0.03] pointer-events-none bg-repeat mix-blend-multiply"
             style={{ backgroundImage: "url('https://images.unsplash.com/photo-1739994885957-add0b729f051?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Nzd8MHwxfHNlYXJjaHwxfHxpc2xhbWljJTIwZ2VvbWV0cmljJTIwcGF0dGVybiUyMHNlYW1sZXNzJTIwYmVpZ2V8ZW58MHx8fHwxNzY3NDQ5MDU2fDA&ixlib=rb-4.1.0&q=85')" }}
           ></div>
           <div className="p-4 border-b border-border/50">
-            <h2 className="text-lg font-semibold text-foreground">رؤى إضافية</h2>
+            <h2 className="text-lg font-semibold text-foreground">{t('additionalInsights')}</h2>
           </div>
           <ScrollArea className="flex-1 relative z-10" data-testid="insights-panel">
             {analysis && (
               <div className="p-4 space-y-4">
                 {analysis.insight_text && (
                   <Card className="p-4">
-                    <h3 className="font-semibold text-foreground mb-2">الإطار الزمني الأعلى</h3>
+                    <h3 className="font-semibold text-foreground mb-2">{t('higherTimeframe')}</h3>
                     <p className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">{analysis.insight_text}</p>
                   </Card>
                 )}
                 {analysis.risk_note && (
                   <Card className="p-4 bg-destructive/10 border-destructive/20">
-                    <h3 className="font-semibold text-destructive mb-2">تحذير المخاطر</h3>
+                    <h3 className="font-semibold text-destructive mb-2">{t('riskWarning')}</h3>
                     <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">{analysis.risk_note}</p>
                   </Card>
                 )}
                 {!analysis.insight_text && !analysis.risk_note && (
-                  <p className="text-sm text-muted-foreground text-center py-8">لا توجد رؤى إضافية</p>
+                  <p className="text-sm text-muted-foreground text-center py-8">{t('noInsights')}</p>
                 )}
               </div>
             )}

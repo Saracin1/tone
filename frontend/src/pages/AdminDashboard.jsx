@@ -1,20 +1,22 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { LogOut, Plus } from 'lucide-react';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t, language } = useLanguage();
   const [user, setUser] = useState(location.state?.user || null);
   const [isAuthenticated, setIsAuthenticated] = useState(location.state?.user ? true : null);
   const [markets, setMarkets] = useState([]);
@@ -102,12 +104,12 @@ export default function AdminDashboard() {
         })
       });
       if (response.ok) {
-        toast.success('تم إنشاء السوق بنجاح');
+        toast.success(t('marketCreated'));
         fetchMarkets();
         e.target.reset();
       }
     } catch (error) {
-      toast.error('فشل إنشاء السوق');
+      toast.error(t('marketFailed'));
     }
   };
 
@@ -127,12 +129,12 @@ export default function AdminDashboard() {
         })
       });
       if (response.ok) {
-        toast.success('تم إنشاء الأصل بنجاح');
+        toast.success(t('assetCreated'));
         fetchAssets();
         e.target.reset();
       }
     } catch (error) {
-      toast.error('فشل إنشاء الأصل');
+      toast.error(t('assetFailed'));
     }
   };
 
@@ -155,11 +157,11 @@ export default function AdminDashboard() {
         })
       });
       if (response.ok) {
-        toast.success('تم إنشاء التحليل بنجاح');
+        toast.success(t('analysisCreated'));
         e.target.reset();
       }
     } catch (error) {
-      toast.error('فشل إنشاء التحليل');
+      toast.error(t('analysisFailed'));
     }
   };
 
@@ -168,7 +170,7 @@ export default function AdminDashboard() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">جاري التحميل...</p>
+          <p className="mt-4 text-muted-foreground">{t('loading')}</p>
         </div>
       </div>
     );
@@ -178,8 +180,9 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-background">
       <header className="border-b border-border/50 bg-card/50 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-foreground">لوحة تحكم المدير</h1>
+          <h1 className="text-2xl font-bold text-foreground">{t('adminDashboard')}</h1>
           <div className="flex items-center gap-4">
+            <LanguageSwitcher />
             <span className="text-sm text-muted-foreground">{user?.name}</span>
             <Button
               onClick={handleLogout}
@@ -189,18 +192,18 @@ export default function AdminDashboard() {
               data-testid="logout-button"
             >
               <LogOut className="w-4 h-4" />
-              تسجيل الخروج
+              {t('logout')}
             </Button>
           </div>
         </div>
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        <Tabs defaultValue="markets" className="w-full" dir="rtl">
+        <Tabs defaultValue="markets" className="w-full" dir={language === 'ar' ? 'rtl' : 'ltr'}>
           <TabsList className="grid w-full grid-cols-3 mb-8">
-            <TabsTrigger value="markets" data-testid="markets-tab">الأسواق</TabsTrigger>
-            <TabsTrigger value="assets" data-testid="assets-tab">الأصول</TabsTrigger>
-            <TabsTrigger value="analysis" data-testid="analysis-tab">التحليلات</TabsTrigger>
+            <TabsTrigger value="markets" data-testid="markets-tab">{t('markets')}</TabsTrigger>
+            <TabsTrigger value="assets" data-testid="assets-tab">{t('assets')}</TabsTrigger>
+            <TabsTrigger value="analysis" data-testid="analysis-tab">{t('analysis')}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="markets">
@@ -209,26 +212,26 @@ export default function AdminDashboard() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Plus className="w-5 h-5" />
-                    إضافة سوق جديد
+                    {t('createMarket')}
                   </CardTitle>
-                  <CardDescription>أضف سوق مالي جديد للمنصة</CardDescription>
+                  <CardDescription>{t('createMarketDesc')}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <form onSubmit={handleCreateMarket} className="space-y-4">
                     <div>
-                      <Label htmlFor="name_ar">الاسم بالعربية</Label>
-                      <Input id="name_ar" name="name_ar" required className="text-right" />
+                      <Label htmlFor="name_ar">{t('nameAr')}</Label>
+                      <Input id="name_ar" name="name_ar" required className={language === 'ar' ? 'text-right' : ''} />
                     </div>
                     <div>
-                      <Label htmlFor="name_en">الاسم بالإنجليزية</Label>
-                      <Input id="name_en" name="name_en" required className="text-right" />
+                      <Label htmlFor="name_en">{t('nameEn')}</Label>
+                      <Input id="name_en" name="name_en" required className={language === 'ar' ? 'text-right' : ''} />
                     </div>
                     <div>
-                      <Label htmlFor="region">المنطقة</Label>
-                      <Input id="region" name="region" required className="text-right" placeholder="مثال: الخليج، اسطنبول، القاهرة" />
+                      <Label htmlFor="region">{t('region')}</Label>
+                      <Input id="region" name="region" required className={language === 'ar' ? 'text-right' : ''} placeholder={t('regionPlaceholder')} />
                     </div>
                     <Button type="submit" className="w-full" data-testid="create-market-button">
-                      إنشاء السوق
+                      {t('createMarketButton')}
                     </Button>
                   </form>
                 </CardContent>
@@ -236,19 +239,19 @@ export default function AdminDashboard() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>الأسواق الحالية</CardTitle>
-                  <CardDescription>قائمة الأسواق المتاحة</CardDescription>
+                  <CardTitle>{t('currentMarkets')}</CardTitle>
+                  <CardDescription>{t('currentMarketsDesc')}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3" data-testid="markets-list">
                     {markets.length === 0 ? (
-                      <p className="text-muted-foreground text-center py-8">لا توجد أسواق بعد</p>
+                      <p className="text-muted-foreground text-center py-8">{t('noMarkets')}</p>
                     ) : (
                       markets.map((market) => (
                         <div key={market.market_id} className="p-4 border border-border rounded-lg">
-                          <h3 className="font-semibold text-foreground">{market.name_ar}</h3>
-                          <p className="text-sm text-muted-foreground">{market.name_en}</p>
-                          <p className="text-xs text-muted-foreground mt-1">المنطقة: {market.region}</p>
+                          <h3 className="font-semibold text-foreground">{language === 'ar' ? market.name_ar : market.name_en}</h3>
+                          <p className="text-sm text-muted-foreground">{language === 'ar' ? market.name_en : market.name_ar}</p>
+                          <p className="text-xs text-muted-foreground mt-1">{t('region')}: {market.region}</p>
                         </div>
                       ))
                     )}
@@ -264,50 +267,50 @@ export default function AdminDashboard() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Plus className="w-5 h-5" />
-                    إضافة أصل جديد
+                    {t('createAsset')}
                   </CardTitle>
-                  <CardDescription>أضف سهم أو مؤشر جديد</CardDescription>
+                  <CardDescription>{t('createAssetDesc')}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <form onSubmit={handleCreateAsset} className="space-y-4">
                     <div>
-                      <Label htmlFor="asset_market_id">السوق</Label>
+                      <Label htmlFor="asset_market_id">{t('market')}</Label>
                       <select
                         id="asset_market_id"
                         name="market_id"
                         required
-                        className="w-full px-3 py-2 border border-input rounded-md bg-background text-right"
+                        className={`w-full px-3 py-2 border border-input rounded-md bg-background ${language === 'ar' ? 'text-right' : ''}`}
                       >
-                        <option value="">اختر السوق</option>
+                        <option value="">{t('selectMarket')}</option>
                         {markets.map((market) => (
                           <option key={market.market_id} value={market.market_id}>
-                            {market.name_ar}
+                            {language === 'ar' ? market.name_ar : market.name_en}
                           </option>
                         ))}
                       </select>
                     </div>
                     <div>
-                      <Label htmlFor="asset_name_ar">الاسم بالعربية</Label>
-                      <Input id="asset_name_ar" name="name_ar" required className="text-right" />
+                      <Label htmlFor="asset_name_ar">{t('nameAr')}</Label>
+                      <Input id="asset_name_ar" name="name_ar" required className={language === 'ar' ? 'text-right' : ''} />
                     </div>
                     <div>
-                      <Label htmlFor="asset_name_en">الاسم بالإنجليزية</Label>
-                      <Input id="asset_name_en" name="name_en" required className="text-right" />
+                      <Label htmlFor="asset_name_en">{t('nameEn')}</Label>
+                      <Input id="asset_name_en" name="name_en" required className={language === 'ar' ? 'text-right' : ''} />
                     </div>
                     <div>
-                      <Label htmlFor="asset_type">النوع</Label>
+                      <Label htmlFor="asset_type">{t('type')}</Label>
                       <select
                         id="asset_type"
                         name="type"
                         required
-                        className="w-full px-3 py-2 border border-input rounded-md bg-background text-right"
+                        className={`w-full px-3 py-2 border border-input rounded-md bg-background ${language === 'ar' ? 'text-right' : ''}`}
                       >
-                        <option value="stock">سهم</option>
-                        <option value="index">مؤشر</option>
+                        <option value="stock">{t('stock')}</option>
+                        <option value="index">{t('index')}</option>
                       </select>
                     </div>
                     <Button type="submit" className="w-full" data-testid="create-asset-button">
-                      إنشاء الأصل
+                      {t('createAssetButton')}
                     </Button>
                   </form>
                 </CardContent>
@@ -315,20 +318,20 @@ export default function AdminDashboard() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>الأصول الحالية</CardTitle>
-                  <CardDescription>قائمة الأصول المتاحة</CardDescription>
+                  <CardTitle>{t('currentAssets')}</CardTitle>
+                  <CardDescription>{t('currentAssetsDesc')}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3 max-h-[500px] overflow-y-auto" data-testid="assets-list">
                     {assets.length === 0 ? (
-                      <p className="text-muted-foreground text-center py-8">لا توجد أصول بعد</p>
+                      <p className="text-muted-foreground text-center py-8">{t('noAssets')}</p>
                     ) : (
                       assets.map((asset) => (
                         <div key={asset.asset_id} className="p-4 border border-border rounded-lg">
-                          <h3 className="font-semibold text-foreground">{asset.name_ar}</h3>
-                          <p className="text-sm text-muted-foreground">{asset.name_en}</p>
+                          <h3 className="font-semibold text-foreground">{language === 'ar' ? asset.name_ar : asset.name_en}</h3>
+                          <p className="text-sm text-muted-foreground">{language === 'ar' ? asset.name_en : asset.name_ar}</p>
                           <p className="text-xs text-muted-foreground mt-1">
-                            النوع: {asset.type === 'stock' ? 'سهم' : 'مؤشر'}
+                            {t('type')}: {asset.type === 'stock' ? t('stock') : t('index')}
                           </p>
                         </div>
                       ))
@@ -344,63 +347,63 @@ export default function AdminDashboard() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Plus className="w-5 h-5" />
-                  إضافة تحليل جديد
+                  {t('createAnalysis')}
                 </CardTitle>
-                <CardDescription>أضف أو حدّث تحليل لأصل معين</CardDescription>
+                <CardDescription>{t('createAnalysisDesc')}</CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleCreateAnalysis} className="space-y-4">
                   <div>
-                    <Label htmlFor="analysis_asset_id">الأصل</Label>
+                    <Label htmlFor="analysis_asset_id">{t('asset')}</Label>
                     <select
                       id="analysis_asset_id"
                       name="asset_id"
                       required
-                      className="w-full px-3 py-2 border border-input rounded-md bg-background text-right"
+                      className={`w-full px-3 py-2 border border-input rounded-md bg-background ${language === 'ar' ? 'text-right' : ''}`}
                     >
-                      <option value="">اختر الأصل</option>
+                      <option value="">{t('selectAsset')}</option>
                       {assets.map((asset) => (
                         <option key={asset.asset_id} value={asset.asset_id}>
-                          {asset.name_ar}
+                          {language === 'ar' ? asset.name_ar : asset.name_en}
                         </option>
                       ))}
                     </select>
                   </div>
                   <div>
-                    <Label htmlFor="bias">التوجه</Label>
-                    <Input id="bias" name="bias" required className="text-right" placeholder="مثال: صاعد، هابط، محايد" />
+                    <Label htmlFor="bias">{t('bias')}</Label>
+                    <Input id="bias" name="bias" required className={language === 'ar' ? 'text-right' : ''} placeholder={t('biasPlaceholder')} />
                   </div>
                   <div>
-                    <Label htmlFor="key_levels">المستويات الرئيسية</Label>
-                    <Textarea id="key_levels" name="key_levels" required className="text-right" placeholder="دعم: 100، مقاومة: 120، هدف: 130" rows={3} />
+                    <Label htmlFor="key_levels">{t('keyLevels')}</Label>
+                    <Textarea id="key_levels" name="key_levels" required className={language === 'ar' ? 'text-right' : ''} placeholder={t('keyLevelsPlaceholder')} rows={3} />
                   </div>
                   <div>
-                    <Label htmlFor="scenario_text">السيناريو</Label>
-                    <Textarea id="scenario_text" name="scenario_text" required className="text-right" placeholder="وصف السيناريو المتوقع..." rows={4} />
+                    <Label htmlFor="scenario_text">{t('scenario')}</Label>
+                    <Textarea id="scenario_text" name="scenario_text" required className={language === 'ar' ? 'text-right' : ''} placeholder={t('scenarioPlaceholder')} rows={4} />
                   </div>
                   <div>
-                    <Label htmlFor="insight_text">ملاحظات الإطار الزمني الأعلى (اختياري)</Label>
-                    <Textarea id="insight_text" name="insight_text" className="text-right" placeholder="ملاحظات إضافية..." rows={3} />
+                    <Label htmlFor="insight_text">{t('higherTFInsight')}</Label>
+                    <Textarea id="insight_text" name="insight_text" className={language === 'ar' ? 'text-right' : ''} placeholder={t('higherTFPlaceholder')} rows={3} />
                   </div>
                   <div>
-                    <Label htmlFor="risk_note">ملاحظة المخاطر (اختياري)</Label>
-                    <Textarea id="risk_note" name="risk_note" className="text-right" placeholder="تحذيرات أو مخاطر محتملة..." rows={2} />
+                    <Label htmlFor="risk_note">{t('riskNote')}</Label>
+                    <Textarea id="risk_note" name="risk_note" className={language === 'ar' ? 'text-right' : ''} placeholder={t('riskPlaceholder')} rows={2} />
                   </div>
                   <div>
-                    <Label htmlFor="confidence_level">مستوى الثقة</Label>
+                    <Label htmlFor="confidence_level">{t('confidenceLevel')}</Label>
                     <select
                       id="confidence_level"
                       name="confidence_level"
                       required
-                      className="w-full px-3 py-2 border border-input rounded-md bg-background text-right"
+                      className={`w-full px-3 py-2 border border-input rounded-md bg-background ${language === 'ar' ? 'text-right' : ''}`}
                     >
-                      <option value="Low">منخفض</option>
-                      <option value="Medium">متوسط</option>
-                      <option value="High">عالي</option>
+                      <option value="Low">{t('confidenceLow')}</option>
+                      <option value="Medium">{t('confidenceMedium')}</option>
+                      <option value="High">{t('confidenceHigh')}</option>
                     </select>
                   </div>
                   <Button type="submit" className="w-full" data-testid="create-analysis-button">
-                    نشر التحليل
+                    {t('publishAnalysis')}
                   </Button>
                 </form>
               </CardContent>
