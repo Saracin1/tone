@@ -656,6 +656,52 @@ async def get_daily_analysis_markets():
     markets = await db.daily_analysis.distinct("market")
     return {"markets": markets}
 
+@api_router.get("/daily-analysis/chart-data")
+async def get_analysis_price_chart_data(request: Request):
+    user = await get_current_user(request)
+    
+    if not check_subscription_access(user):
+        raise HTTPException(
+            status_code=403,
+            detail="Active subscription required"
+        )
+    
+    pipeline = [
+        {
+            "$group": {
+                "_id": {
+                    "market": "$market",
+                    "instrument": "$instrument_code"
+                },
+                "latest_price": {"$last": "$analysis_price"}
+            }
+        },
+        {
+            "$project": {
+                "_id": 0,
+                "market": "$_id.market",
+                "instrument": "$_id.instrument",
+                "analysis_price": "$latest_price"
+            }
+        }
+    ]
+    
+    results = await db.daily_analysis.aggregate(pipeline).to_list(1000)
+    
+    chart_data = []
+    for item in results:
+        try:
+            price_value = float(item["analysis_price"].replace(",", ""))
+            chart_data.append({
+                "market": item["market"],
+                "instrument": item["instrument"],
+                "value": price_value
+            })
+        except (ValueError, AttributeError):
+            continue
+    
+    return chart_data
+
 app.include_router(api_router)
 
 app.add_middleware(
