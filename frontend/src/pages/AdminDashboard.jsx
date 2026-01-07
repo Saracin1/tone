@@ -262,6 +262,125 @@ export default function AdminDashboard() {
     }
   };
 
+  const fetchForecasts = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/admin/history/forecasts`, {
+        credentials: 'include'
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setForecasts(data);
+      }
+    } catch (error) {
+      console.error('Error fetching forecasts:', error);
+    }
+  };
+
+  const handleCreateForecast = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    
+    const forecastData = {
+      instrument_code: formData.get('instrument_code'),
+      market: formData.get('market'),
+      forecast_date: formData.get('forecast_date'),
+      forecast_direction: formData.get('forecast_direction'),
+      entry_price: parseFloat(formData.get('entry_price')),
+      forecast_target_price: parseFloat(formData.get('forecast_target_price')),
+      notes: formData.get('notes') || null
+    };
+
+    // If actual result is provided
+    const actualResult = formData.get('actual_result_price');
+    const resultDate = formData.get('result_date');
+    if (actualResult && resultDate) {
+      forecastData.actual_result_price = parseFloat(actualResult);
+      forecastData.result_date = resultDate;
+    }
+
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/admin/history/forecast`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(forecastData)
+      });
+
+      if (response.ok) {
+        toast.success(language === 'ar' ? 'تم إنشاء التوقع بنجاح' : 'Forecast created successfully');
+        fetchForecasts();
+        e.target.reset();
+      } else {
+        const error = await response.json();
+        toast.error(error.detail || (language === 'ar' ? 'فشل في إنشاء التوقع' : 'Failed to create forecast'));
+      }
+    } catch (error) {
+      toast.error(language === 'ar' ? 'حدث خطأ' : 'An error occurred');
+    }
+  };
+
+  const handleUpdateForecastResult = async (e) => {
+    e.preventDefault();
+    if (!editingForecast) return;
+    
+    const formData = new FormData(e.target);
+    
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/admin/history/forecast/${editingForecast.record_id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          actual_result_price: parseFloat(formData.get('actual_result_price')),
+          result_date: formData.get('result_date'),
+          notes: formData.get('notes') || null
+        })
+      });
+
+      if (response.ok) {
+        toast.success(language === 'ar' ? 'تم تحديث النتيجة بنجاح' : 'Result updated successfully');
+        fetchForecasts();
+        setEditingForecast(null);
+      } else {
+        const error = await response.json();
+        toast.error(error.detail || (language === 'ar' ? 'فشل في التحديث' : 'Update failed'));
+      }
+    } catch (error) {
+      toast.error(language === 'ar' ? 'حدث خطأ' : 'An error occurred');
+    }
+  };
+
+  const handleDeleteForecast = async (recordId) => {
+    if (!confirm(language === 'ar' ? 'هل أنت متأكد من حذف هذا التوقع؟' : 'Are you sure you want to delete this forecast?')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/admin/history/forecast/${recordId}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+
+      if (response.ok) {
+        toast.success(language === 'ar' ? 'تم الحذف بنجاح' : 'Deleted successfully');
+        fetchForecasts();
+      } else {
+        toast.error(language === 'ar' ? 'فشل في الحذف' : 'Delete failed');
+      }
+    } catch (error) {
+      toast.error(language === 'ar' ? 'حدث خطأ' : 'An error occurred');
+    }
+  };
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return '-';
+    try {
+      return new Date(dateStr).toLocaleDateString(language === 'ar' ? 'ar-SA' : 'en-US');
+    } catch {
+      return dateStr;
+    }
+  };
+
   if (isAuthenticated === null) {
     return (
       <div className="min-h-screen flex items-center justify-center">
