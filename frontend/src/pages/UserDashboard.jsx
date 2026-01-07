@@ -8,6 +8,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { LogOut, ChevronDown, ChevronLeft, Lock } from 'lucide-react';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { SubscriptionBanner } from '@/components/SubscriptionBanner';
+import { AnalysisPriceChart } from '@/components/AnalysisPriceChart';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
