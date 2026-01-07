@@ -199,6 +199,10 @@ async def create_session(request: Request, response: Response):
             "name": session_data.name,
             "picture": session_data.picture,
             "access_level": "Limited",
+            "subscription_type": None,
+            "subscription_status": "none",
+            "subscription_start_date": None,
+            "subscription_end_date": None,
             "created_at": datetime.now(timezone.utc).isoformat()
         })
     
