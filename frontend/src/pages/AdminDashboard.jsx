@@ -27,6 +27,8 @@ export default function AdminDashboard() {
   const [syncResults, setSyncResults] = useState(null);
   const [syncing, setSyncing] = useState(false);
   const [dailyAnalysis, setDailyAnalysis] = useState([]);
+  const [forecasts, setForecasts] = useState([]);
+  const [editingForecast, setEditingForecast] = useState(null);
 
   useEffect(() => {
     if (location.state?.user) return;
