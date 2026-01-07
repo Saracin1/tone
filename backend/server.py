@@ -10,6 +10,9 @@ from typing import List, Optional
 import uuid
 from datetime import datetime, timezone, timedelta
 import httpx
+from google.oauth2 import service_account
+from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -93,6 +96,31 @@ class AnalysisCreate(BaseModel):
     risk_note: Optional[str] = None
     confidence_level: str
 
+class DailyAnalysis(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    record_id: str
+    market: str
+    instrument_code: str
+    insight_type: str
+    analysis_datetime: str
+    analysis_price: str
+    target_price: str
+    critical_level: str
+    source: str = "google_sheets"
+    created_at: str
+    updated_at: str
+
+class GoogleSheetsConfig(BaseModel):
+    spreadsheet_id: str
+    range_name: str = "Sheet1!A2:G"
+
+class SyncResult(BaseModel):
+    total_rows: int
+    inserted: int
+    updated: int
+    skipped: int
+    errors: List[str]
+
 async def get_current_user(request: Request) -> Optional[User]:
     session_token = request.cookies.get("session_token")
     if not session_token:
@@ -158,6 +186,37 @@ def check_subscription_access(user: User, required_access: str = "any") -> bool:
     required_level = subscription_hierarchy.get(required_access, 0)
     
     return user_level >= required_level
+
+def parse_datetime_string(date_str: str) -> str:
+    try:
+        parts = date_str.strip().replace('[', '').replace(']', '').split()
+        if len(parts) >= 2:
+            date_part = parts[0]
+            time_part = parts[1] if len(parts) > 1 else "00:00:00"
+        else:
+            date_part = parts[0]
+            time_part = "00:00:00"
+        
+        day, month, year = date_part.split('.')
+        dt = datetime.strptime(f"{year}-{month}-{day} {time_part}", "%Y-%m-%d %H:%M:%S")
+        dt = dt.replace(tzinfo=timezone.utc)
+        return dt.isoformat()
+    except Exception as e:
+        raise ValueError(f"Invalid datetime format: {date_str}. Expected DD.MM.YYYY [HH:MM:SS]")
+
+def get_sheets_service():
+    credentials_json = os.environ.get('GOOGLE_SHEETS_CREDENTIALS')
+    if not credentials_json:
+        raise ValueError("GOOGLE_SHEETS_CREDENTIALS environment variable not set")
+    
+    import json
+    credentials_dict = json.loads(credentials_json)
+    credentials = service_account.Credentials.from_service_account_info(
+        credentials_dict,
+        scopes=['https://www.googleapis.com/auth/spreadsheets.readonly']
+    )
+    
+    return build('sheets', 'v4', credentials=credentials)
 
 @api_router.post("/auth/session")
 async def create_session(request: Request, response: Response):
@@ -472,6 +531,130 @@ async def create_analysis(analysis: AnalysisCreate, request: Request):
     )
     
     return Analysis(**analysis_doc)
+
+@api_router.post("/admin/sheets/sync")
+async def sync_from_google_sheets(config: GoogleSheetsConfig, request: Request):
+    user = await get_current_user(request)
+    if user.access_level != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    try:
+        service = get_sheets_service()
+        sheet = service.spreadsheets()
+        result = sheet.values().get(
+            spreadsheetId=config.spreadsheet_id,
+            range=config.range_name
+        ).execute()
+        values = result.get('values', [])
+        
+        if not values:
+            return SyncResult(
+                total_rows=0,
+                inserted=0,
+                updated=0,
+                skipped=0,
+                errors=["No data found in sheet"]
+            )
+        
+        total_rows = len(values)
+        inserted = 0
+        updated = 0
+        skipped = 0
+        errors = []
+        
+        for idx, row in enumerate(values, start=2):
+            try:
+                if len(row) < 7:
+                    skipped += 1
+                    errors.append(f"Row {idx}: Insufficient columns (expected 7, got {len(row)})")
+                    continue
+                
+                market = row[0].strip()
+                instrument_code = row[1].strip()
+                insight_type = row[2].strip()
+                date_time_str = row[3].strip()
+                analysis_price = row[4].strip()
+                target_price = row[5].strip()
+                critical_level = row[6].strip()
+                
+                if not all([market, instrument_code, insight_type, date_time_str]):
+                    skipped += 1
+                    errors.append(f"Row {idx}: Missing required fields")
+                    continue
+                
+                analysis_datetime = parse_datetime_string(date_time_str)
+                
+                unique_key = {
+                    "market": market,
+                    "instrument_code": instrument_code,
+                    "analysis_datetime": analysis_datetime
+                }
+                
+                now = datetime.now(timezone.utc).isoformat()
+                record = {
+                    "record_id": f"daily_{uuid.uuid4().hex[:12]}",
+                    "market": market,
+                    "instrument_code": instrument_code,
+                    "insight_type": insight_type,
+                    "analysis_datetime": analysis_datetime,
+                    "analysis_price": analysis_price,
+                    "target_price": target_price,
+                    "critical_level": critical_level,
+                    "source": "google_sheets",
+                    "updated_at": now
+                }
+                
+                existing = await db.daily_analysis.find_one(unique_key, {"_id": 0})
+                
+                if existing:
+                    await db.daily_analysis.update_one(
+                        unique_key,
+                        {"$set": record}
+                    )
+                    updated += 1
+                else:
+                    record["created_at"] = now
+                    await db.daily_analysis.insert_one(record)
+                    inserted += 1
+                
+            except ValueError as e:
+                skipped += 1
+                errors.append(f"Row {idx}: {str(e)}")
+            except Exception as e:
+                skipped += 1
+                errors.append(f"Row {idx}: Unexpected error - {str(e)}")
+        
+        return SyncResult(
+            total_rows=total_rows,
+            inserted=inserted,
+            updated=updated,
+            skipped=skipped,
+            errors=errors
+        )
+    
+    except HttpError as e:
+        raise HTTPException(status_code=400, detail=f"Google Sheets API error: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Sync failed: {str(e)}")
+
+@api_router.get("/daily-analysis")
+async def get_daily_analysis(request: Request, market: Optional[str] = None, limit: int = 100):
+    user = await get_current_user(request)
+    
+    if not check_subscription_access(user):
+        raise HTTPException(
+            status_code=403,
+            detail="Active subscription required to view analysis"
+        )
+    
+    query = {"market": market} if market else {}
+    analyses = await db.daily_analysis.find(query, {"_id": 0}).sort("analysis_datetime", -1).limit(limit).to_list(limit)
+    return analyses
+
+@api_router.get("/daily-analysis/markets")
+async def get_daily_analysis_markets():
+    markets = await db.daily_analysis.distinct("market")
+    return {"markets": markets}
 
 app.include_router(api_router)
 
