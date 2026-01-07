@@ -5,10 +5,12 @@ import { useSubscription } from '@/contexts/SubscriptionContext';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { LogOut, ChevronDown, ChevronLeft, Lock } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { LogOut, ChevronDown, ChevronLeft, Lock, BarChart3, PieChartIcon, LineChartIcon } from 'lucide-react';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { SubscriptionBanner } from '@/components/SubscriptionBanner';
 import { AnalysisPriceChart } from '@/components/AnalysisPriceChart';
+import { AnalysisPriceLineChart } from '@/components/AnalysisPriceLineChart';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
