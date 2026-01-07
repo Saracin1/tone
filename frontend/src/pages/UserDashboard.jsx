@@ -15,6 +15,7 @@ export default function UserDashboard() {
   const navigate = useNavigate();
   const location = useLocation();
   const { t, language } = useLanguage();
+  const { subscriptionStatus, checkSubscription } = useSubscription();
   const [user, setUser] = useState(location.state?.user || null);
   const [isAuthenticated, setIsAuthenticated] = useState(location.state?.user ? true : null);
   const [markets, setMarkets] = useState([]);
@@ -22,6 +23,7 @@ export default function UserDashboard() {
   const [selectedAsset, setSelectedAsset] = useState(null);
   const [analysis, setAnalysis] = useState(null);
   const [expandedMarkets, setExpandedMarkets] = useState({});
+  const [accessDenied, setAccessDenied] = useState(false);
 
   useEffect(() => {
     if (location.state?.user) return;
