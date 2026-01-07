@@ -250,8 +250,8 @@ async def get_analysis(asset_id: str):
 @api_router.post("/analysis", response_model=Analysis)
 async def create_analysis(analysis: AnalysisCreate, request: Request):
     user = await get_current_user(request)
-    if user.role != "admin":
-        raise HTTPException(status_code=403, detail="Admin only")
+    if user.access_level != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
     
     asset = await db.assets.find_one({"asset_id": analysis.asset_id}, {"_id": 0})
     if not asset:
