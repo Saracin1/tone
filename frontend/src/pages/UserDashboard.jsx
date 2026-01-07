@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useSubscription } from '@/contexts/SubscriptionContext';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { LogOut, ChevronDown, ChevronLeft } from 'lucide-react';
+import { LogOut, ChevronDown, ChevronLeft, Lock } from 'lucide-react';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { SubscriptionBanner } from '@/components/SubscriptionBanner';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
