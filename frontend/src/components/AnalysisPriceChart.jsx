@@ -167,7 +167,12 @@ export function AnalysisPriceChart({ autoRefreshInterval = 60000 }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{language === 'ar' ? 'توزيع أسعار التحليل' : 'Analysis Price Distribution'}</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          {language === 'ar' ? 'توزيع أسعار التحليل' : 'Analysis Price Distribution'}
+          {isRefreshing && (
+            <RefreshCw className="w-4 h-4 animate-spin text-muted-foreground" />
+          )}
+        </CardTitle>
         <CardDescription>
           {language === 'ar' 
             ? `الوزن النسبي لكل أداة من إجمالي ${total.toLocaleString()}`
