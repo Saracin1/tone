@@ -135,6 +135,111 @@ backend:
         agent: "testing"
         comment: "✅ Endpoint responds correctly with 401 authentication required (expected behavior). Endpoint is properly implemented and protected."
 
+  - task: "History of Success - Summary endpoint"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Created /api/history/summary endpoint that returns summary statistics (total_forecasts, win_rate, cumulative return, etc.)"
+      - working: true
+        agent: "testing"
+        comment: "✅ Endpoint working perfectly. Returns all required fields: total_forecasts, completed_forecasts, successful_forecasts, pending_forecasts, win_rate, total_return_percent, avg_return_percent, best_trade_percent, worst_trade_percent. Authentication properly enforced."
+
+  - task: "History of Success - Forecasts endpoint"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Created /api/history/forecasts endpoint that returns list of all forecasts with filtering support"
+      - working: true
+        agent: "testing"
+        comment: "✅ Endpoint working perfectly. Returns proper forecast data structure with all required fields: record_id, instrument_code, market, forecast_date, forecast_direction, entry_price, forecast_target_price, status. Query parameters (market, status, limit) working correctly."
+
+  - task: "History of Success - Performance endpoint"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Created /api/history/performance endpoint that returns aggregated performance data for bar chart"
+      - working: true
+        agent: "testing"
+        comment: "✅ Endpoint working perfectly. Returns aggregated performance data by instrument with proper structure for bar charts."
+
+  - task: "History of Success - Cumulative endpoint"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Created /api/history/cumulative endpoint that returns cumulative return data for line chart"
+      - working: true
+        agent: "testing"
+        comment: "✅ Endpoint working perfectly. Returns cumulative performance data over time with proper structure for line charts."
+
+  - task: "History of Success - Markets endpoint"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Created /api/history/markets endpoint that returns markets with forecast data"
+      - working: true
+        agent: "testing"
+        comment: "✅ Endpoint working perfectly. Returns markets list with proper structure."
+
+  - task: "History of Success - Admin CRUD endpoints"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Created admin endpoints: POST /api/admin/history/forecast, PUT /api/admin/history/forecast/{record_id}, DELETE /api/admin/history/forecast/{record_id}, GET /api/admin/history/forecasts"
+      - working: true
+        agent: "testing"
+        comment: "✅ All admin endpoints working perfectly. CREATE: Creates forecasts with proper P/L calculation and status determination. UPDATE: Updates forecasts with accurate P/L calculation (Bullish: (result-entry)/entry*100, Bearish: (entry-result)/entry*100) and correct status logic. DELETE: Properly removes forecasts. Admin access control working correctly (403 for non-admin users)."
+
+  - task: "History of Success - P/L Calculation Logic"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implemented P/L calculation logic for Bullish and Bearish forecasts with status determination"
+      - working: true
+        agent: "testing"
+        comment: "✅ P/L calculation logic working perfectly. Bullish: ((result-entry)/entry)*100, Bearish: ((entry-result)/entry)*100. Status determination correct: success if target met, failed otherwise. All test scenarios passed with accurate calculations."
+
 frontend:
   - task: "Line Chart component"
     implemented: true
