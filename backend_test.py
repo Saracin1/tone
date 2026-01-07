@@ -355,6 +355,377 @@ class FinancialDashboardTester:
                 self.log_test(f"Sample Asset - {expected}", found,
                             f"Found assets: {asset_names}" if not found else "")
 
+    def setup_forecast_test_data(self):
+        """Setup test forecast data in MongoDB"""
+        print("\n🔧 Setting up forecast test data...")
+        
+        try:
+            timestamp = int(datetime.now().timestamp())
+            
+            mongo_script = f"""
+            use('test_database');
+            
+            // Clear existing test forecast data
+            db.forecast_history.deleteMany({{instrument_code: /TEST_/}});
+            
+            // Insert test forecast data
+            var testForecasts = [
+                {{
+                    record_id: 'forecast_test_success_1',
+                    instrument_code: 'TEST_AAPL',
+                    market: 'NASDAQ',
+                    forecast_date: '2024-01-15',
+                    forecast_direction: 'Bullish',
+                    entry_price: 150.0,
+                    forecast_target_price: 160.0,
+                    actual_result_price: 165.0,
+                    result_date: '2024-01-20',
+                    calculated_pl_percent: 10.0,
+                    status: 'success',
+                    notes: 'Test successful forecast',
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                }},
+                {{
+                    record_id: 'forecast_test_failed_1',
+                    instrument_code: 'TEST_TSLA',
+                    market: 'NASDAQ',
+                    forecast_date: '2024-01-10',
+                    forecast_direction: 'Bearish',
+                    entry_price: 200.0,
+                    forecast_target_price: 180.0,
+                    actual_result_price: 210.0,
+                    result_date: '2024-01-18',
+                    calculated_pl_percent: -5.0,
+                    status: 'failed',
+                    notes: 'Test failed forecast',
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                }},
+                {{
+                    record_id: 'forecast_test_pending_1',
+                    instrument_code: 'TEST_GOOGL',
+                    market: 'NASDAQ',
+                    forecast_date: '2024-01-25',
+                    forecast_direction: 'Bullish',
+                    entry_price: 120.0,
+                    forecast_target_price: 130.0,
+                    actual_result_price: null,
+                    result_date: null,
+                    calculated_pl_percent: null,
+                    status: 'pending',
+                    notes: 'Test pending forecast',
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                }}
+            ];
+            
+            db.forecast_history.insertMany(testForecasts);
+            print('Inserted ' + testForecasts.length + ' test forecasts');
+            """
+            
+            result = subprocess.run(['mongosh', '--eval', mongo_script], 
+                                  capture_output=True, text=True, timeout=30)
+            
+            if result.returncode == 0:
+                print("✅ Test forecast data created")
+                return True
+            else:
+                print(f"❌ Failed to create test forecast data: {result.stderr}")
+                return False
+                
+        except Exception as e:
+            print(f"❌ Error creating test forecast data: {str(e)}")
+            return False
+
+    def test_history_endpoints(self):
+        """Test History of Success endpoints"""
+        print("\n📈 Testing History of Success Endpoints...")
+        
+        # Test authentication required for all endpoints
+        temp_token = self.session_token
+        self.session_token = None
+        
+        self.run_test("History Summary - No Auth", "GET", "history/summary", 401)
+        self.run_test("History Forecasts - No Auth", "GET", "history/forecasts", 401)
+        self.run_test("History Performance - No Auth", "GET", "history/performance", 401)
+        self.run_test("History Cumulative - No Auth", "GET", "history/cumulative", 401)
+        self.run_test("History Markets - No Auth", "GET", "history/markets", 401)
+        
+        self.session_token = temp_token
+        
+        # Test authenticated endpoints
+        summary_data = self.run_test("History Summary", "GET", "history/summary", 200)
+        if summary_data:
+            expected_fields = ['total_forecasts', 'completed_forecasts', 'successful_forecasts', 
+                             'pending_forecasts', 'win_rate', 'total_return_percent', 
+                             'avg_return_percent', 'best_trade_percent', 'worst_trade_percent']
+            
+            for field in expected_fields:
+                has_field = field in summary_data
+                self.log_test(f"Summary Field - {field}", has_field, 
+                            f"Missing field: {field}" if not has_field else "")
+        
+        forecasts_data = self.run_test("History Forecasts", "GET", "history/forecasts", 200)
+        if forecasts_data:
+            self.log_test("Forecasts Data Structure", isinstance(forecasts_data, list), 
+                         f"Response type: {type(forecasts_data)}")
+            
+            if forecasts_data and len(forecasts_data) > 0:
+                forecast = forecasts_data[0]
+                expected_fields = ['record_id', 'instrument_code', 'market', 'forecast_date', 
+                                 'forecast_direction', 'entry_price', 'forecast_target_price', 'status']
+                
+                for field in expected_fields:
+                    has_field = field in forecast
+                    self.log_test(f"Forecast Field - {field}", has_field, 
+                                f"Missing field: {field}" if not has_field else "")
+        
+        performance_data = self.run_test("History Performance", "GET", "history/performance", 200)
+        if performance_data:
+            self.log_test("Performance Data Structure", isinstance(performance_data, list), 
+                         f"Response type: {type(performance_data)}")
+        
+        cumulative_data = self.run_test("History Cumulative", "GET", "history/cumulative", 200)
+        if cumulative_data:
+            self.log_test("Cumulative Data Structure", isinstance(cumulative_data, list), 
+                         f"Response type: {type(cumulative_data)}")
+        
+        markets_data = self.run_test("History Markets", "GET", "history/markets", 200)
+        if markets_data:
+            has_markets_field = 'markets' in markets_data
+            self.log_test("Markets Response Structure", has_markets_field, 
+                         f"Response keys: {list(markets_data.keys()) if isinstance(markets_data, dict) else 'Not a dict'}")
+        
+        # Test query parameters
+        self.run_test("History Forecasts - Market Filter", "GET", "history/forecasts?market=NASDAQ", 200)
+        self.run_test("History Forecasts - Status Filter", "GET", "history/forecasts?status=success", 200)
+        self.run_test("History Forecasts - Limit", "GET", "history/forecasts?limit=5", 200)
+
+    def test_admin_history_endpoints(self):
+        """Test admin History of Success endpoints"""
+        print("\n🔐 Testing Admin History Endpoints...")
+        
+        if not self.admin_token:
+            print("⚠️ No admin token available, skipping admin tests")
+            return None
+        
+        # Test admin access required
+        self.run_test("Admin Get Forecasts - User Access", "GET", "admin/history/forecasts", 403)
+        
+        # Switch to admin token
+        old_token = self.session_token
+        self.session_token = self.admin_token
+        
+        # Test admin get all forecasts
+        admin_forecasts = self.run_test("Admin Get All Forecasts", "GET", "admin/history/forecasts", 200)
+        
+        # Test create new forecast
+        new_forecast_data = {
+            "instrument_code": "TEST_MSFT",
+            "market": "NASDAQ",
+            "forecast_date": "2024-01-30",
+            "forecast_direction": "Bullish",
+            "entry_price": 300.0,
+            "forecast_target_price": 320.0,
+            "notes": "Test admin created forecast"
+        }
+        
+        created_forecast = self.run_test("Admin Create Forecast", "POST", "admin/history/forecast", 200, new_forecast_data)
+        
+        forecast_id = None
+        if created_forecast and 'record_id' in created_forecast:
+            forecast_id = created_forecast['record_id']
+            
+            # Test update forecast with result
+            update_data = {
+                "actual_result_price": 325.0,
+                "result_date": "2024-02-05",
+                "notes": "Updated with actual result"
+            }
+            
+            updated_forecast = self.run_test(f"Admin Update Forecast", "PUT", 
+                                           f"admin/history/forecast/{forecast_id}", 200, update_data)
+            
+            if updated_forecast:
+                # Verify P/L calculation
+                expected_pl = ((325.0 - 300.0) / 300.0) * 100  # Should be ~8.33%
+                actual_pl = updated_forecast.get('calculated_pl_percent', 0)
+                pl_correct = abs(actual_pl - expected_pl) < 0.1
+                self.log_test("P/L Calculation Correct", pl_correct, 
+                            f"Expected: {expected_pl:.2f}%, Got: {actual_pl}%")
+                
+                # Verify status determination
+                expected_status = "success"  # 325 >= 320 (target)
+                actual_status = updated_forecast.get('status')
+                status_correct = actual_status == expected_status
+                self.log_test("Status Determination Correct", status_correct, 
+                            f"Expected: {expected_status}, Got: {actual_status}")
+        
+        # Test delete forecast
+        if forecast_id:
+            self.run_test("Admin Delete Forecast", "DELETE", f"admin/history/forecast/{forecast_id}", 200)
+            
+            # Verify deletion
+            self.run_test("Admin Delete Forecast - Verify", "DELETE", f"admin/history/forecast/{forecast_id}", 404)
+        
+        # Test non-existent forecast operations
+        self.run_test("Admin Update Non-existent", "PUT", "admin/history/forecast/non_existent", 404, update_data)
+        self.run_test("Admin Delete Non-existent", "DELETE", "admin/history/forecast/non_existent", 404)
+        
+        # Switch back to regular user
+        self.session_token = old_token
+        
+        # Test regular user cannot access admin endpoints
+        self.run_test("User Create Forecast - Should Fail", "POST", "admin/history/forecast", 403, new_forecast_data)
+        self.run_test("User Update Forecast - Should Fail", "PUT", "admin/history/forecast/test_id", 403, update_data)
+        self.run_test("User Delete Forecast - Should Fail", "DELETE", "admin/history/forecast/test_id", 403)
+        
+        return admin_forecasts
+
+    def test_pl_calculation_logic(self):
+        """Test P/L calculation logic for different scenarios"""
+        print("\n🧮 Testing P/L Calculation Logic...")
+        
+        if not self.admin_token:
+            print("⚠️ No admin token available, skipping P/L calculation tests")
+            return
+        
+        old_token = self.session_token
+        self.session_token = self.admin_token
+        
+        # Test Bullish successful trade
+        bullish_success = {
+            "instrument_code": "TEST_PL_BULL_SUCCESS",
+            "market": "TEST",
+            "forecast_date": "2024-01-01",
+            "forecast_direction": "Bullish",
+            "entry_price": 100.0,
+            "forecast_target_price": 110.0,
+            "actual_result_price": 115.0,
+            "result_date": "2024-01-10",
+            "notes": "Bullish success test"
+        }
+        
+        result = self.run_test("P/L Test - Bullish Success", "POST", "admin/history/forecast", 200, bullish_success)
+        if result:
+            expected_pl = ((115.0 - 100.0) / 100.0) * 100  # 15%
+            actual_pl = result.get('calculated_pl_percent', 0)
+            expected_status = "success"  # 115 >= 110
+            actual_status = result.get('status')
+            
+            self.log_test("Bullish Success P/L", abs(actual_pl - expected_pl) < 0.1, 
+                         f"Expected: {expected_pl}%, Got: {actual_pl}%")
+            self.log_test("Bullish Success Status", actual_status == expected_status, 
+                         f"Expected: {expected_status}, Got: {actual_status}")
+        
+        # Test Bullish failed trade
+        bullish_failed = {
+            "instrument_code": "TEST_PL_BULL_FAILED",
+            "market": "TEST",
+            "forecast_date": "2024-01-01",
+            "forecast_direction": "Bullish",
+            "entry_price": 100.0,
+            "forecast_target_price": 110.0,
+            "actual_result_price": 95.0,
+            "result_date": "2024-01-10",
+            "notes": "Bullish failed test"
+        }
+        
+        result = self.run_test("P/L Test - Bullish Failed", "POST", "admin/history/forecast", 200, bullish_failed)
+        if result:
+            expected_pl = ((95.0 - 100.0) / 100.0) * 100  # -5%
+            actual_pl = result.get('calculated_pl_percent', 0)
+            expected_status = "failed"  # 95 < 110
+            actual_status = result.get('status')
+            
+            self.log_test("Bullish Failed P/L", abs(actual_pl - expected_pl) < 0.1, 
+                         f"Expected: {expected_pl}%, Got: {actual_pl}%")
+            self.log_test("Bullish Failed Status", actual_status == expected_status, 
+                         f"Expected: {expected_status}, Got: {actual_status}")
+        
+        # Test Bearish successful trade
+        bearish_success = {
+            "instrument_code": "TEST_PL_BEAR_SUCCESS",
+            "market": "TEST",
+            "forecast_date": "2024-01-01",
+            "forecast_direction": "Bearish",
+            "entry_price": 100.0,
+            "forecast_target_price": 90.0,
+            "actual_result_price": 85.0,
+            "result_date": "2024-01-10",
+            "notes": "Bearish success test"
+        }
+        
+        result = self.run_test("P/L Test - Bearish Success", "POST", "admin/history/forecast", 200, bearish_success)
+        if result:
+            expected_pl = ((100.0 - 85.0) / 100.0) * 100  # 15%
+            actual_pl = result.get('calculated_pl_percent', 0)
+            expected_status = "success"  # 85 <= 90
+            actual_status = result.get('status')
+            
+            self.log_test("Bearish Success P/L", abs(actual_pl - expected_pl) < 0.1, 
+                         f"Expected: {expected_pl}%, Got: {actual_pl}%")
+            self.log_test("Bearish Success Status", actual_status == expected_status, 
+                         f"Expected: {expected_status}, Got: {actual_status}")
+        
+        # Test Bearish failed trade
+        bearish_failed = {
+            "instrument_code": "TEST_PL_BEAR_FAILED",
+            "market": "TEST",
+            "forecast_date": "2024-01-01",
+            "forecast_direction": "Bearish",
+            "entry_price": 100.0,
+            "forecast_target_price": 90.0,
+            "actual_result_price": 105.0,
+            "result_date": "2024-01-10",
+            "notes": "Bearish failed test"
+        }
+        
+        result = self.run_test("P/L Test - Bearish Failed", "POST", "admin/history/forecast", 200, bearish_failed)
+        if result:
+            expected_pl = ((100.0 - 105.0) / 100.0) * 100  # -5%
+            actual_pl = result.get('calculated_pl_percent', 0)
+            expected_status = "failed"  # 105 > 90
+            actual_status = result.get('status')
+            
+            self.log_test("Bearish Failed P/L", abs(actual_pl - expected_pl) < 0.1, 
+                         f"Expected: {expected_pl}%, Got: {actual_pl}%")
+            self.log_test("Bearish Failed Status", actual_status == expected_status, 
+                         f"Expected: {expected_status}, Got: {actual_status}")
+        
+        self.session_token = old_token
+
+    def cleanup_forecast_test_data(self):
+        """Clean up forecast test data"""
+        print("\n🧹 Cleaning up forecast test data...")
+        
+        try:
+            mongo_script = """
+            use('test_database');
+            
+            // Clean up test forecast data
+            var deletedForecasts = db.forecast_history.deleteMany({
+                $or: [
+                    {instrument_code: /TEST_/},
+                    {record_id: /forecast_test_/}
+                ]
+            });
+            
+            print('Deleted test forecasts: ' + deletedForecasts.deletedCount);
+            """
+            
+            result = subprocess.run(['mongosh', '--eval', mongo_script], 
+                                  capture_output=True, text=True, timeout=30)
+            
+            if result.returncode == 0:
+                print("✅ Forecast test data cleaned up")
+            else:
+                print(f"⚠️ Forecast cleanup warning: {result.stderr}")
+                
+        except Exception as e:
+            print(f"⚠️ Forecast cleanup error: {str(e)}")
+
     def cleanup_test_data(self):
         """Clean up test data"""
         print("\n🧹 Cleaning up test data...")
