@@ -32,7 +32,7 @@ export default function AdminDashboard() {
         });
         if (!response.ok) throw new Error('Not authenticated');
         const userData = await response.json();
-        if (userData.role !== 'admin') {
+        if (userData.access_level !== 'admin') {
           navigate('/dashboard');
           return;
         }
