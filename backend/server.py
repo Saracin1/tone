@@ -240,6 +240,54 @@ async def logout(request: Request, response: Response):
     response.delete_cookie(key="session_token", path="/")
     return {"message": "Logged out"}
 
+class SubscriptionUpdate(BaseModel):
+    subscription_type: str
+    duration_days: int
+
+@api_router.post("/subscriptions/activate")
+async def activate_subscription(subscription: SubscriptionUpdate, request: Request):
+    user = await get_current_user(request)
+    
+    if subscription.subscription_type not in ["Beginner", "Advanced", "Premium"]:
+        raise HTTPException(status_code=400, detail="Invalid subscription type")
+    
+    start_date = datetime.now(timezone.utc)
+    end_date = start_date + timedelta(days=subscription.duration_days)
+    
+    await db.users.update_one(
+        {"user_id": user.user_id},
+        {"$set": {
+            "subscription_type": subscription.subscription_type,
+            "subscription_status": "active",
+            "subscription_start_date": start_date.isoformat(),
+            "subscription_end_date": end_date.isoformat()
+        }}
+    )
+    
+    updated_user = await db.users.find_one({"user_id": user.user_id}, {"_id": 0})
+    return User(**updated_user)
+
+@api_router.get("/subscriptions/status")
+async def get_subscription_status(request: Request):
+    user = await get_current_user(request)
+    
+    has_access = check_subscription_access(user)
+    days_remaining = None
+    
+    if user.subscription_end_date and user.subscription_status == "active":
+        end_date = datetime.fromisoformat(user.subscription_end_date)
+        if end_date.tzinfo is None:
+            end_date = end_date.replace(tzinfo=timezone.utc)
+        days_remaining = max(0, (end_date - datetime.now(timezone.utc)).days)
+    
+    return {
+        "subscription_type": user.subscription_type,
+        "subscription_status": user.subscription_status,
+        "has_access": has_access,
+        "days_remaining": days_remaining,
+        "subscription_end_date": user.subscription_end_date
+    }
+
 @api_router.get("/markets", response_model=List[Market])
 async def get_markets():
     markets = await db.markets.find({}, {"_id": 0}).to_list(100)
