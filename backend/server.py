@@ -288,6 +288,97 @@ async def get_subscription_status(request: Request):
         "subscription_end_date": user.subscription_end_date
     }
 
+class AdminSubscriptionControl(BaseModel):
+    user_email: str
+    subscription_type: str
+    duration_days: int
+    action: str
+
+@api_router.get("/admin/users")
+async def get_all_users(request: Request):
+    user = await get_current_user(request)
+    if user.access_level != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    users = await db.users.find({}, {"_id": 0}).to_list(1000)
+    return users
+
+@api_router.post("/admin/users/subscription")
+async def admin_manage_subscription(control: AdminSubscriptionControl, request: Request):
+    user = await get_current_user(request)
+    if user.access_level != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    if control.subscription_type not in ["Beginner", "Advanced", "Premium"]:
+        raise HTTPException(status_code=400, detail="Invalid subscription type")
+    
+    target_user = await db.users.find_one({"email": control.user_email}, {"_id": 0})
+    if not target_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    now = datetime.now(timezone.utc)
+    
+    if control.action == "activate":
+        end_date = now + timedelta(days=control.duration_days)
+        await db.users.update_one(
+            {"email": control.user_email},
+            {"$set": {
+                "subscription_type": control.subscription_type,
+                "subscription_status": "active",
+                "subscription_start_date": now.isoformat(),
+                "subscription_end_date": end_date.isoformat()
+            }}
+        )
+    
+    elif control.action == "extend":
+        current_end = target_user.get("subscription_end_date")
+        if current_end:
+            current_end_date = datetime.fromisoformat(current_end)
+            if current_end_date.tzinfo is None:
+                current_end_date = current_end_date.replace(tzinfo=timezone.utc)
+            if current_end_date < now:
+                new_end_date = now + timedelta(days=control.duration_days)
+            else:
+                new_end_date = current_end_date + timedelta(days=control.duration_days)
+        else:
+            new_end_date = now + timedelta(days=control.duration_days)
+        
+        await db.users.update_one(
+            {"email": control.user_email},
+            {"$set": {
+                "subscription_type": control.subscription_type,
+                "subscription_status": "active",
+                "subscription_end_date": new_end_date.isoformat()
+            }}
+        )
+    
+    elif control.action == "deactivate":
+        await db.users.update_one(
+            {"email": control.user_email},
+            {"$set": {
+                "subscription_status": "expired",
+                "subscription_end_date": now.isoformat()
+            }}
+        )
+    
+    elif control.action == "gift":
+        end_date = now + timedelta(days=control.duration_days)
+        await db.users.update_one(
+            {"email": control.user_email},
+            {"$set": {
+                "subscription_type": control.subscription_type,
+                "subscription_status": "active",
+                "subscription_start_date": now.isoformat(),
+                "subscription_end_date": end_date.isoformat()
+            }}
+        )
+    
+    else:
+        raise HTTPException(status_code=400, detail="Invalid action")
+    
+    updated_user = await db.users.find_one({"email": control.user_email}, {"_id": 0})
+    return User(**updated_user)
+
 @api_router.get("/markets", response_model=List[Market])
 async def get_markets():
     markets = await db.markets.find({}, {"_id": 0}).to_list(100)
