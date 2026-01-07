@@ -505,6 +505,139 @@ export default function AdminDashboard() {
             </Card>
           </TabsContent>
 
+          <TabsContent value="daily">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Plus className="w-5 h-5" />
+                    {t('syncFromSheets')}
+                  </CardTitle>
+                  <CardDescription>{t('syncFromSheetsDesc')}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handleSyncGoogleSheets} className="space-y-4">
+                    <div>
+                      <Label htmlFor="spreadsheet_id">{t('spreadsheetId')}</Label>
+                      <Input 
+                        id="spreadsheet_id" 
+                        name="spreadsheet_id" 
+                        required 
+                        defaultValue="1GcXY5-SFba417vZXxOAL3uk7HZlzGBZz72-JWj2rNv4"
+                        className={language === 'ar' ? 'text-right' : ''} 
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {language === 'ar' ? 'من عنوان الرابط: docs.google.com/spreadsheets/d/[ID]' : 'From URL: docs.google.com/spreadsheets/d/[ID]'}
+                      </p>
+                    </div>
+                    <div>
+                      <Label htmlFor="range_name">{t('sheetRange')}</Label>
+                      <Input 
+                        id="range_name" 
+                        name="range_name" 
+                        defaultValue="Sheet1!A2:G"
+                        className={language === 'ar' ? 'text-right' : ''} 
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {language === 'ar' ? 'نطاق البيانات (افتراضي: Sheet1!A2:G)' : 'Data range (default: Sheet1!A2:G)'}
+                      </p>
+                    </div>
+                    <Button 
+                      type="submit" 
+                      className="w-full" 
+                      disabled={syncing}
+                      data-testid="sync-sheets-button"
+                    >
+                      {syncing ? t('syncInProgress') : t('syncNow')}
+                    </Button>
+                  </form>
+
+                  {syncResults && (
+                    <div className="mt-6 p-4 border border-border rounded-lg space-y-2">
+                      <h3 className="font-semibold text-foreground">{t('syncResults')}</h3>
+                      <div className="grid grid-cols-2 gap-2 text-sm">
+                        <div>
+                          <span className="text-muted-foreground">{t('totalRows')}:</span>
+                          <span className="font-semibold ml-2">{syncResults.total_rows}</span>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">{t('inserted')}:</span>
+                          <span className="font-semibold ml-2 text-primary">{syncResults.inserted}</span>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">{t('updated')}:</span>
+                          <span className="font-semibold ml-2 text-secondary">{syncResults.updated}</span>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">{t('skipped')}:</span>
+                          <span className="font-semibold ml-2 text-muted-foreground">{syncResults.skipped}</span>
+                        </div>
+                      </div>
+                      {syncResults.errors && syncResults.errors.length > 0 && (
+                        <div className="mt-3">
+                          <p className="text-sm font-semibold text-destructive mb-1">{t('errors')}:</p>
+                          <div className="max-h-32 overflow-y-auto space-y-1">
+                            {syncResults.errors.map((error, idx) => (
+                              <p key={idx} className="text-xs text-muted-foreground">{error}</p>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>{t('latestAnalysis')}</CardTitle>
+                  <CardDescription>{t('viewDailyAnalysis')}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button 
+                    onClick={fetchDailyAnalysis} 
+                    variant="outline" 
+                    size="sm" 
+                    className="mb-4"
+                  >
+                    {language === 'ar' ? 'تحديث' : 'Refresh'}
+                  </Button>
+                  <div className="space-y-3 max-h-[500px] overflow-y-auto" data-testid="daily-analysis-list">
+                    {dailyAnalysis.length === 0 ? (
+                      <p className="text-muted-foreground text-center py-8">
+                        {language === 'ar' ? 'لا توجد تحليلات يومية بعد' : 'No daily analysis yet'}
+                      </p>
+                    ) : (
+                      dailyAnalysis.map((record) => (
+                        <div key={record.record_id} className="p-4 border border-border rounded-lg space-y-2">
+                          <div className="flex items-center justify-between">
+                            <h3 className="font-semibold text-foreground">{record.instrument_code}</h3>
+                            <span className="text-xs text-muted-foreground">{record.market}</span>
+                          </div>
+                          <p className="text-sm text-primary font-medium">{record.insight_type}</p>
+                          <div className="grid grid-cols-3 gap-2 text-xs text-muted-foreground">
+                            <div>
+                              <span className="font-semibold">{language === 'ar' ? 'السعر:' : 'Price:'}</span> {record.analysis_price}
+                            </div>
+                            <div>
+                              <span className="font-semibold">{language === 'ar' ? 'الهدف:' : 'Target:'}</span> {record.target_price}
+                            </div>
+                            <div>
+                              <span className="font-semibold">{language === 'ar' ? 'حرج:' : 'Critical:'}</span> {record.critical_level}
+                            </div>
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            {new Date(record.analysis_datetime).toLocaleString(language === 'ar' ? 'ar-SA' : 'en-US')}
+                          </p>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
           <TabsContent value="users">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card>
