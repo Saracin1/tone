@@ -222,15 +222,42 @@ export default function UserDashboard() {
           <SubscriptionBanner />
           <div className="flex-1 p-6 overflow-y-auto">
             {!selectedAsset ? (
-              <div className="h-full flex items-center justify-center">
-                <div className="text-center">
-                  <div className="w-24 h-24 mx-auto mb-4 bg-secondary/20 rounded-full flex items-center justify-center">
-                    <svg className="w-12 h-12 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                    </svg>
-                  </div>
+              <div className="space-y-6">
+                {/* Welcome Section */}
+                <div className="text-center py-6">
                   <h2 className="text-2xl font-bold text-foreground mb-2">{t('welcome')}</h2>
                   <p className="text-muted-foreground">{t('selectAssetToView')}</p>
+                </div>
+                
+                {/* Charts Section */}
+                <div className="space-y-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <BarChart3 className="w-5 h-5 text-primary" />
+                    <h3 className="text-lg font-semibold text-foreground">
+                      {language === 'ar' ? 'نظرة عامة على السوق' : 'Market Overview'}
+                    </h3>
+                  </div>
+                  
+                  <Tabs defaultValue="line" className="w-full">
+                    <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto mb-4">
+                      <TabsTrigger value="line" className="flex items-center gap-2">
+                        <LineChartIcon className="w-4 h-4" />
+                        {language === 'ar' ? 'مقارنة الأسعار' : 'Price Comparison'}
+                      </TabsTrigger>
+                      <TabsTrigger value="pie" className="flex items-center gap-2">
+                        <PieChartIcon className="w-4 h-4" />
+                        {language === 'ar' ? 'التوزيع' : 'Distribution'}
+                      </TabsTrigger>
+                    </TabsList>
+                    
+                    <TabsContent value="line" className="mt-0">
+                      <AnalysisPriceLineChart autoRefreshInterval={30000} />
+                    </TabsContent>
+                    
+                    <TabsContent value="pie" className="mt-0">
+                      <AnalysisPriceChart autoRefreshInterval={30000} />
+                    </TabsContent>
+                  </Tabs>
                 </div>
               </div>
             ) : accessDenied ? (
