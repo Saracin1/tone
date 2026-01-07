@@ -394,6 +394,7 @@ class FinancialDashboardTester:
         markets_data = self.test_markets_endpoints()
         assets_data = self.test_assets_endpoints(markets_data)
         self.test_analysis_endpoints(assets_data)
+        self.test_chart_endpoints()
         self.test_sample_data()
         
         # Cleanup
