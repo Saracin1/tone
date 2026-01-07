@@ -81,15 +81,23 @@ export default function UserDashboard() {
       const response = await fetch(`${BACKEND_URL}/api/analysis/${assetId}`, {
         credentials: 'include'
       });
+      if (response.status === 403) {
+        setAccessDenied(true);
+        setAnalysis(null);
+        return;
+      }
       if (response.ok) {
         const data = await response.json();
         setAnalysis(data);
+        setAccessDenied(false);
       } else {
         setAnalysis(null);
+        setAccessDenied(false);
       }
     } catch (error) {
       console.error('Error fetching analysis:', error);
       setAnalysis(null);
+      setAccessDenied(false);
     }
   };
 
