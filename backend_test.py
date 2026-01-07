@@ -5,7 +5,7 @@ from datetime import datetime
 import subprocess
 
 class FinancialDashboardTester:
-    def __init__(self, base_url="https://market-insights-140.preview.emergentagent.com"):
+    def __init__(self, base_url="https://finanzo.preview.emergentagent.com"):
         self.base_url = base_url
         self.session_token = None
         self.admin_token = None
