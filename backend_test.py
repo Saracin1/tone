@@ -291,6 +291,32 @@ class FinancialDashboardTester:
             # Test create analysis as regular user (should fail)
             self.run_test("Create Analysis - User (Should Fail)", "POST", "analysis", 403, analysis_data)
 
+    def test_chart_endpoints(self):
+        """Test chart data endpoints for dashboard"""
+        print("\n📊 Testing Chart Data Endpoints...")
+        
+        # Test line chart data endpoint
+        line_data = self.run_test("Line Chart Data", "GET", "daily-analysis/line-chart-data", 200)
+        if line_data is not None:
+            self.log_test("Line Chart Data Structure", 
+                         isinstance(line_data, list), 
+                         f"Response type: {type(line_data)}")
+        
+        # Test pie chart data endpoint  
+        pie_data = self.run_test("Pie Chart Data", "GET", "daily-analysis/chart-data", 200)
+        if pie_data is not None:
+            self.log_test("Pie Chart Data Structure", 
+                         isinstance(pie_data, list), 
+                         f"Response type: {type(pie_data)}")
+        
+        # Test last sync endpoint
+        sync_data = self.run_test("Last Sync Timestamp", "GET", "daily-analysis/last-sync", 200)
+        if sync_data is not None:
+            has_last_sync = 'last_sync' in sync_data
+            self.log_test("Last Sync Response Structure", 
+                         has_last_sync, 
+                         f"Response keys: {list(sync_data.keys()) if isinstance(sync_data, dict) else 'Not a dict'}")
+
     def test_sample_data(self):
         """Test if sample data exists"""
         print("\n📋 Testing Sample Data...")
