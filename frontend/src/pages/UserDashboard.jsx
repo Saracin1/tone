@@ -216,6 +216,7 @@ export default function UserDashboard() {
         </div>
 
         <div className="col-span-12 lg:col-span-7 flex flex-col bg-card rounded-lg shadow-sm border border-border/50 overflow-hidden" data-testid="analysis-display">
+          <SubscriptionBanner />
           <div className="flex-1 p-6 overflow-y-auto">
             {!selectedAsset ? (
               <div className="h-full flex items-center justify-center">
@@ -228,6 +229,32 @@ export default function UserDashboard() {
                   <h2 className="text-2xl font-bold text-foreground mb-2">{t('welcome')}</h2>
                   <p className="text-muted-foreground">{t('selectAssetToView')}</p>
                 </div>
+              </div>
+            ) : accessDenied ? (
+              <div className="h-full flex items-center justify-center">
+                <Card className="p-8 max-w-md text-center bg-destructive/5 border-destructive/20">
+                  <Lock className="w-16 h-16 mx-auto mb-4 text-destructive" />
+                  <h2 className="text-xl font-bold text-foreground mb-2">
+                    {language === 'ar' ? 'اشتراك مطلوب' : 'Subscription Required'}
+                  </h2>
+                  <p className="text-muted-foreground mb-4">
+                    {language === 'ar' 
+                      ? 'يتطلب اشتراك نشط لعرض التحليلات. يرجى تفعيل اشتراكك للوصول الكامل إلى المنصة.'
+                      : 'An active subscription is required to view analysis. Please activate your subscription to access the full platform.'
+                    }
+                  </p>
+                  {subscriptionStatus && (
+                    <div className="text-sm text-muted-foreground">
+                      {language === 'ar' ? 'الحالة: ' : 'Status: '}
+                      <span className="font-semibold">
+                        {subscriptionStatus.subscription_status === 'expired' 
+                          ? (language === 'ar' ? 'منتهي' : 'Expired')
+                          : (language === 'ar' ? 'غير مفعل' : 'None')
+                        }
+                      </span>
+                    </div>
+                  )}
+                </Card>
               </div>
             ) : !analysis ? (
               <div className="h-full flex items-center justify-center">
