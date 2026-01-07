@@ -335,7 +335,15 @@ async def create_asset(asset: AssetCreate, request: Request):
     return Asset(**asset_doc)
 
 @api_router.get("/analysis/{asset_id}")
-async def get_analysis(asset_id: str):
+async def get_analysis(asset_id: str, request: Request):
+    user = await get_current_user(request)
+    
+    if not check_subscription_access(user):
+        raise HTTPException(
+            status_code=403, 
+            detail="Active subscription required to view analysis"
+        )
+    
     analysis = await db.analyses.find_one({"asset_id": asset_id}, {"_id": 0})
     if not analysis:
         return None
