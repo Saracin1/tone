@@ -702,6 +702,85 @@ async def get_analysis_price_chart_data(request: Request):
     
     return chart_data
 
+@api_router.get("/daily-analysis/line-chart-data")
+async def get_line_chart_data(request: Request):
+    """
+    Returns analysis price vs target price data for all instruments.
+    Used for the dual-line comparison chart.
+    """
+    user = await get_current_user(request)
+    
+    if not check_subscription_access(user):
+        raise HTTPException(
+            status_code=403,
+            detail="Active subscription required"
+        )
+    
+    # Get the latest record for each instrument
+    pipeline = [
+        {"$sort": {"analysis_datetime": -1}},
+        {
+            "$group": {
+                "_id": {
+                    "market": "$market",
+                    "instrument": "$instrument_code"
+                },
+                "analysis_price": {"$first": "$analysis_price"},
+                "target_price": {"$first": "$target_price"},
+                "analysis_datetime": {"$first": "$analysis_datetime"}
+            }
+        },
+        {
+            "$project": {
+                "_id": 0,
+                "market": "$_id.market",
+                "instrument_code": "$_id.instrument",
+                "analysis_price": 1,
+                "target_price": 1,
+                "analysis_datetime": 1
+            }
+        },
+        {"$sort": {"market": 1, "instrument_code": 1}}
+    ]
+    
+    results = await db.daily_analysis.aggregate(pipeline).to_list(1000)
+    
+    chart_data = []
+    for item in results:
+        try:
+            analysis_price = float(item["analysis_price"].replace(",", "")) if item.get("analysis_price") else 0
+            target_price = float(item["target_price"].replace(",", "")) if item.get("target_price") else 0
+            
+            chart_data.append({
+                "market": item["market"],
+                "instrument_code": item["instrument_code"],
+                "analysis_price": analysis_price,
+                "target_price": target_price,
+                "analysis_datetime": item.get("analysis_datetime", "")
+            })
+        except (ValueError, AttributeError) as e:
+            continue
+    
+    return chart_data
+
+@api_router.get("/daily-analysis/last-sync")
+async def get_last_sync_time(request: Request):
+    """
+    Returns the last sync timestamp to enable auto-refresh detection.
+    """
+    user = await get_current_user(request)
+    
+    # Get the most recent updated_at from daily_analysis
+    latest = await db.daily_analysis.find_one(
+        {},
+        {"_id": 0, "updated_at": 1},
+        sort=[("updated_at", -1)]
+    )
+    
+    return {
+        "last_sync": latest.get("updated_at") if latest else None
+    }
+
 app.include_router(api_router)
 
 app.add_middleware(
