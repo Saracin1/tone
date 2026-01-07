@@ -223,14 +223,17 @@ export default function UserDashboard() {
           <SubscriptionBanner />
           <div className="flex-1 p-6 overflow-y-auto">
             {!selectedAsset ? (
-              <div className="space-y-6">
+              <div className="space-y-8">
                 {/* Welcome Section */}
-                <div className="text-center py-6">
+                <div className="text-center py-4">
                   <h2 className="text-2xl font-bold text-foreground mb-2">{t('welcome')}</h2>
                   <p className="text-muted-foreground">{t('selectAssetToView')}</p>
                 </div>
                 
-                {/* Charts Section */}
+                {/* History of Success Section */}
+                <HistoryOfSuccess autoRefreshInterval={60000} />
+                
+                {/* Market Overview Charts Section */}
                 <div className="space-y-6">
                   <div className="flex items-center gap-2 mb-4">
                     <BarChart3 className="w-5 h-5 text-primary" />
