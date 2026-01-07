@@ -202,8 +202,8 @@ async def get_markets():
 @api_router.post("/markets", response_model=Market)
 async def create_market(market: MarketCreate, request: Request):
     user = await get_current_user(request)
-    if user.role != "admin":
-        raise HTTPException(status_code=403, detail="Admin only")
+    if user.access_level != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
     
     market_id = f"market_{uuid.uuid4().hex[:12]}"
     market_doc = {
