@@ -29,6 +29,10 @@ class User(BaseModel):
     name: str
     picture: str
     access_level: str = "Limited"
+    subscription_type: Optional[str] = None
+    subscription_status: str = "none"
+    subscription_start_date: Optional[str] = None
+    subscription_end_date: Optional[str] = None
     created_at: str
 
 class SessionData(BaseModel):
