@@ -211,6 +211,53 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleSyncGoogleSheets = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    setSyncing(true);
+    setSyncResults(null);
+    
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/admin/sheets/sync`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          spreadsheet_id: formData.get('spreadsheet_id'),
+          range_name: formData.get('range_name') || 'Sheet1!A2:G'
+        })
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        setSyncResults(result);
+        toast.success(t('syncSuccess'));
+        fetchDailyAnalysis();
+      } else {
+        const error = await response.json();
+        toast.error(t('syncFailed') + ': ' + (error.detail || 'Unknown error'));
+      }
+    } catch (error) {
+      toast.error(t('syncFailed'));
+    } finally {
+      setSyncing(false);
+    }
+  };
+
+  const fetchDailyAnalysis = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/daily-analysis?limit=50`, {
+        credentials: 'include'
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setDailyAnalysis(data);
+      }
+    } catch (error) {
+      console.error('Error fetching daily analysis:', error);
+    }
+  };
+
   if (isAuthenticated === null) {
     return (
       <div className="min-h-screen flex items-center justify-center">
