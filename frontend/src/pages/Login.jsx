@@ -55,11 +55,11 @@ export default function Login() {
       className="min-h-screen flex items-center justify-center bg-cover bg-center relative"
       style={{ backgroundImage: "url('https://images.unsplash.com/photo-1680214180543-119d7f766381?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2Mzl8MHwxfHNlYXJjaHwxfHxkZXNlcnQlMjBzYW5kJTIwdGV4dHVyZSUyMGxpZ2h0JTIwc3VidGxlfGVufDB8fHx8MTc2NzQ0OTA1OHww&ixlib=rb-4.1.0&q=85')" }}
     >
-      <div className="absolute top-4 right-4">
+      <div className="absolute inset-0 bg-background/80 backdrop-blur-sm"></div>
+      
+      <div className="absolute top-4 right-4 z-50">
         <LanguageSwitcher />
       </div>
-      
-      <div className="absolute inset-0 bg-background/80 backdrop-blur-sm"></div>
       
       <div className="relative z-10 w-full max-w-md mx-4">
         <div className="bg-card/60 backdrop-blur-md border border-border/50 rounded-xl shadow-2xl p-8">
