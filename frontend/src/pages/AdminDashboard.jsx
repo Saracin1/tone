@@ -80,6 +80,18 @@ export default function AdminDashboard() {
     }
   };
 
+  const fetchUsers = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/admin/users`, {
+        credentials: 'include'
+      });
+      const data = await response.json();
+      setUsers(data);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    }
+  };
+
   const handleLogout = async () => {
     try {
       await fetch(`${BACKEND_URL}/api/auth/logout`, {
