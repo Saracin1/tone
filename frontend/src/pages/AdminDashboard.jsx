@@ -293,10 +293,11 @@ export default function AdminDashboard() {
 
       <main className="container mx-auto px-4 py-8">
         <Tabs defaultValue="markets" className="w-full" dir={language === 'ar' ? 'rtl' : 'ltr'}>
-          <TabsList className="grid w-full grid-cols-4 mb-8">
+          <TabsList className="grid w-full grid-cols-5 mb-8">
             <TabsTrigger value="markets" data-testid="markets-tab">{t('markets')}</TabsTrigger>
             <TabsTrigger value="assets" data-testid="assets-tab">{t('assets')}</TabsTrigger>
             <TabsTrigger value="analysis" data-testid="analysis-tab">{t('analysis')}</TabsTrigger>
+            <TabsTrigger value="daily" data-testid="daily-tab">{t('dailyAnalysis')}</TabsTrigger>
             <TabsTrigger value="users" data-testid="users-tab">{t('users')}</TabsTrigger>
           </TabsList>
 
