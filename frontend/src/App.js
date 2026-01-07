@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { LanguageProvider, useLanguage } from '@/contexts/LanguageContext';
+import { SubscriptionProvider } from '@/contexts/SubscriptionContext';
 import Login from '@/pages/Login';
 import AuthCallback from '@/pages/AuthCallback';
 import AdminDashboard from '@/pages/AdminDashboard';
@@ -14,13 +15,15 @@ function AppRouter() {
     return <AuthCallback />;
   }
   return (
-    <div dir={language === 'ar' ? 'rtl' : 'ltr'}>
-      <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/admin" element={<AdminDashboard />} />
-        <Route path="/dashboard" element={<UserDashboard />} />
-      </Routes>
-    </div>
+    <SubscriptionProvider>
+      <div dir={language === 'ar' ? 'rtl' : 'ltr'}>
+        <Routes>
+          <Route path="/" element={<Login />} />
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/dashboard" element={<UserDashboard />} />
+        </Routes>
+      </div>
+    </SubscriptionProvider>
   );
 }
 
