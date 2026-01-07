@@ -52,6 +52,7 @@ export default function AdminDashboard() {
     if (isAuthenticated) {
       fetchMarkets();
       fetchAssets();
+      fetchUsers();
     }
   }, [isAuthenticated]);
 
