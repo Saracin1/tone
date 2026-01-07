@@ -152,10 +152,15 @@ class FinancialDashboardTester:
             // Insert test admin
             db.users.insertOne({{
               user_id: adminId,
+              google_user_id: 'google_' + adminId,
               email: adminEmail,
               name: 'Test Admin',
               picture: 'https://via.placeholder.com/150',
-              role: 'admin',
+              access_level: 'admin',
+              subscription_type: 'Premium',
+              subscription_status: 'active',
+              subscription_start_date: new Date().toISOString(),
+              subscription_end_date: new Date(Date.now() + 30*24*60*60*1000).toISOString(),
               created_at: new Date().toISOString()
             }});
             
