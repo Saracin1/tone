@@ -180,6 +180,34 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleManageSubscription = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/admin/users/subscription`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          user_email: formData.get('user_email'),
+          subscription_type: formData.get('subscription_type'),
+          duration_days: parseInt(formData.get('duration_days')),
+          action: formData.get('action')
+        })
+      });
+      if (response.ok) {
+        toast.success(t('subscriptionUpdated'));
+        fetchUsers();
+        e.target.reset();
+        setSelectedUser(null);
+      } else {
+        toast.error(t('subscriptionFailed'));
+      }
+    } catch (error) {
+      toast.error(t('subscriptionFailed'));
+    }
+  };
+
   if (isAuthenticated === null) {
     return (
       <div className="min-h-screen flex items-center justify-center">
