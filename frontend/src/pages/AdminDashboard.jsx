@@ -23,6 +23,9 @@ export default function AdminDashboard() {
   const [assets, setAssets] = useState([]);
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [syncResults, setSyncResults] = useState(null);
+  const [syncing, setSyncing] = useState(false);
+  const [dailyAnalysis, setDailyAnalysis] = useState([]);
 
   useEffect(() => {
     if (location.state?.user) return;
