@@ -59,6 +59,7 @@ export default function AdminDashboard() {
       fetchMarkets();
       fetchAssets();
       fetchUsers();
+      fetchForecasts();
     }
   }, [isAuthenticated]);
 
