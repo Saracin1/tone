@@ -21,6 +21,8 @@ export default function AdminDashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(location.state?.user ? true : null);
   const [markets, setMarkets] = useState([]);
   const [assets, setAssets] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
 
   useEffect(() => {
     if (location.state?.user) return;
