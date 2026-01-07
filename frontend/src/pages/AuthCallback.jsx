@@ -34,7 +34,7 @@ export default function AuthCallback() {
 
         const user = await response.json();
         
-        if (user.role === 'admin') {
+        if (user.access_level === 'admin') {
           navigate('/admin', { state: { user }, replace: true });
         } else {
           navigate('/dashboard', { state: { user }, replace: true });
