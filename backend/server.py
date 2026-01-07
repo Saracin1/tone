@@ -136,18 +136,27 @@ async def create_session(request: Request, response: Response):
         
         session_data = SessionData(**resp.json())
     
-    existing_user = await db.users.find_one({"email": session_data.email}, {"_id": 0})
+    existing_user = await db.users.find_one({"google_user_id": session_data.id}, {"_id": 0})
     
     if existing_user:
         user_id = existing_user["user_id"]
+        await db.users.update_one(
+            {"user_id": user_id},
+            {"$set": {
+                "email": session_data.email,
+                "name": session_data.name,
+                "picture": session_data.picture
+            }}
+        )
     else:
         user_id = f"user_{uuid.uuid4().hex[:12]}"
         await db.users.insert_one({
             "user_id": user_id,
+            "google_user_id": session_data.id,
             "email": session_data.email,
             "name": session_data.name,
             "picture": session_data.picture,
-            "role": "user",
+            "access_level": "Limited",
             "created_at": datetime.now(timezone.utc).isoformat()
         })
     
