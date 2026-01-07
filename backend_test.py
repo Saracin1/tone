@@ -779,6 +779,9 @@ class FinancialDashboardTester:
         if not self.create_test_admin_session():
             print("⚠️ Failed to create test admin, some tests will be skipped")
         
+        # Setup test data for History of Success
+        self.setup_forecast_test_data()
+        
         # Run tests
         self.test_auth_endpoints()
         markets_data = self.test_markets_endpoints()
@@ -786,6 +789,11 @@ class FinancialDashboardTester:
         self.test_analysis_endpoints(assets_data)
         self.test_chart_endpoints()
         self.test_sample_data()
+        
+        # Test History of Success feature
+        self.test_history_endpoints()
+        self.test_admin_history_endpoints()
+        self.test_pl_calculation_logic()
         
         # Cleanup
         self.cleanup_test_data()
