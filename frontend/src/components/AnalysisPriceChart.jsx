@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { RefreshCw } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -21,17 +22,17 @@ const PINE_COLORS = [
   '#4D6A7D', // Deep teal
 ];
 
-export function AnalysisPriceChart() {
+export function AnalysisPriceChart({ autoRefreshInterval = 60000 }) {
   const { t, language } = useLanguage();
   const [chartData, setChartData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
+  const [lastSync, setLastSync] = useState(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  useEffect(() => {
-    fetchChartData();
-  }, []);
-
-  const fetchChartData = async () => {
+  const fetchChartData = useCallback(async (showRefreshIndicator = false) => {
+    if (showRefreshIndicator) setIsRefreshing(true);
+    
     try {
       const response = await fetch(`${BACKEND_URL}/api/daily-analysis/chart-data`, {
         credentials: 'include'
@@ -45,7 +46,7 @@ export function AnalysisPriceChart() {
         setTotal(totalValue);
         
         // Prepare chart data with percentages
-        const chartData = data.map((item, index) => ({
+        const processedData = data.map((item, index) => ({
           name: item.instrument,
           value: item.value,
           market: item.market,
@@ -54,16 +55,48 @@ export function AnalysisPriceChart() {
         }));
         
         // Sort by value descending
-        chartData.sort((a, b) => b.value - a.value);
+        processedData.sort((a, b) => b.value - a.value);
         
-        setChartData(chartData);
+        setChartData(processedData);
       }
     } catch (error) {
       console.error('Error fetching chart data:', error);
     } finally {
       setLoading(false);
+      setIsRefreshing(false);
     }
-  };
+  }, []);
+
+  const checkForUpdates = useCallback(async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/daily-analysis/last-sync`, {
+        credentials: 'include'
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.last_sync && data.last_sync !== lastSync) {
+          setLastSync(data.last_sync);
+          fetchChartData(true);
+        }
+      }
+    } catch (error) {
+      console.error('Error checking for updates:', error);
+    }
+  }, [lastSync, fetchChartData]);
+
+  useEffect(() => {
+    fetchChartData();
+  }, [fetchChartData]);
+
+  // Auto-refresh: poll for updates
+  useEffect(() => {
+    const interval = setInterval(() => {
+      checkForUpdates();
+    }, autoRefreshInterval);
+
+    return () => clearInterval(interval);
+  }, [checkForUpdates, autoRefreshInterval]);
 
   const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
