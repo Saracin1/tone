@@ -4,7 +4,7 @@ const LanguageContext = createContext();
 
 export const translations = {
   ar: {
-    appName: 'الواحة المالية',
+    appName: 'تحليل ون',
     appTagline: 'منصة التحليل المالي',
     appDescription: 'تحليلات مالية متقدمة للأسواق الخليجية والعربية',
     loginButton: 'تسجيل الدخول عبر Google',
@@ -63,7 +63,7 @@ export const translations = {
     assetFailed: 'فشل إنشاء الأصل',
     analysisCreated: 'تم إنشاء التحليل بنجاح',
     analysisFailed: 'فشل إنشاء التحليل',
-    welcome: 'مرحباً بك في الواحة المالية',
+    welcome: 'مرحباً بك في تحليل ون',
     selectAssetToView: 'اختر أصلاً من القائمة لعرض التحليل',
     noAnalysis: 'لا يوجد تحليل متاح لهذا الأصل حالياً',
     direction: 'التوجه',
@@ -77,7 +77,7 @@ export const translations = {
     noInsights: 'لا توجد رؤى إضافية'
   },
   en: {
-    appName: 'Al-Waha Financial',
+    appName: 'Tahlil One',
     appTagline: 'Financial Analysis Platform',
     appDescription: 'Advanced financial analysis for Gulf and Arab markets',
     loginButton: 'Sign in with Google',
@@ -136,7 +136,7 @@ export const translations = {
     assetFailed: 'Failed to create asset',
     analysisCreated: 'Analysis created successfully',
     analysisFailed: 'Failed to create analysis',
-    welcome: 'Welcome to Al-Waha Financial',
+    welcome: 'Welcome to Tahlil One',
     selectAssetToView: 'Select an asset from the list to view analysis',
     noAnalysis: 'No analysis available for this asset currently',
     direction: 'Direction',

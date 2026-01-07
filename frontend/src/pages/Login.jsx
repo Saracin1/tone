@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const LOGO_URL = 'https://customer-assets.emergentagent.com/job_8e72d90b-2ff6-41c5-81dc-28aaecc4e8af/artifacts/auvyrao6_ChatGPT%20Image%20Jan%207%2C%202026%2C%2010_00_13%20PM.png';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -64,11 +65,11 @@ export default function Login() {
       <div className="relative z-10 w-full max-w-md mx-4">
         <div className="bg-card/60 backdrop-blur-md border border-border/50 rounded-xl shadow-2xl p-8">
           <div className="text-center mb-8">
-            <div 
-              className="w-20 h-20 mx-auto mb-4 bg-cover bg-center rounded-full border-4 border-primary/20"
-              style={{ backgroundImage: "url('https://images.unsplash.com/photo-1613982102700-e8715e4f472e?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NjZ8MHwxfHNlYXJjaHwzfHxhcmFiaWMlMjBmbG9yYWwlMjBvcm5hbWVudCUyMHZlY3RvciUyMHN0eWxlfGVufDB8fHx8MTc2NzQ0OTA2MHww&ixlib=rb-4.1.0&q=85')" }}
-            ></div>
-            <h1 className="text-4xl font-bold mb-2 text-foreground">{t('appName')}</h1>
+            <img 
+              src={LOGO_URL}
+              alt="Tahlil One Logo"
+              className="w-64 h-auto mx-auto mb-6"
+            />
             <p className="text-muted-foreground text-lg">{t('appTagline')}</p>
           </div>
           
