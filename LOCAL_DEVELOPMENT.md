@@ -12,13 +12,15 @@
 ### Backend Environment (`backend/.env`)
 
 ```env
-MONGO_URL=mongodb+srv://fmukhlisov_db_user:Analiz75@cluster0.t3j6lmc.mongodb.net/?appName=Cluster0
+MONGO_URL=YOUR_MONGODB_CONNECTION_STRING
 DB_NAME=tahlil_one
 CORS_ORIGINS=http://localhost:3000
-GOOGLE_CLIENT_ID=962102164814-cktrna95l1j88n6bvp8emb59i4fulguj.apps.googleusercontent.com
-GOOGLE_CLIENT_SECRET=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
+GOOGLE_CLIENT_ID=YOUR_GOOGLE_CLIENT_ID
+GOOGLE_CLIENT_SECRET=YOUR_GOOGLE_CLIENT_SECRET
 GOOGLE_REDIRECT_URI=http://localhost:8000/api/auth/google/callback
 ```
+
+> ⚠️ **Replace placeholders with your actual credentials before running!**
 
 ### Frontend Environment (`frontend/.env`)
 
