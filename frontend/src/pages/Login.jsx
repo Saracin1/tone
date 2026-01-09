@@ -36,8 +36,8 @@ export default function Login() {
   }, [navigate]);
 
   const handleLogin = () => {
-    const redirectUrl = window.location.origin + '/dashboard';
-    window.location.href = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(redirectUrl)}`;
+    // Direct to backend Google OAuth endpoint
+    window.location.href = `${BACKEND_URL}/api/auth/google`;
   };
 
   if (checking) {
