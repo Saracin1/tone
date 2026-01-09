@@ -255,45 +255,84 @@ def get_sheets_service():
     
     return build('sheets', 'v4', credentials=credentials)
 
-@api_router.post("/auth/session")
-async def create_session(request: Request, response: Response):
-    data = await request.json()
-    session_id = data.get("session_id")
-    
-    if not session_id:
-        raise HTTPException(status_code=400, detail="session_id required")
+# Google OAuth Configuration
+GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID')
+GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET')
+GOOGLE_REDIRECT_URI = os.environ.get('GOOGLE_REDIRECT_URI', 'http://localhost:8000/api/auth/google/callback')
+FRONTEND_URL = os.environ.get('CORS_ORIGINS', 'http://localhost:3000').split(',')[0]
+
+@api_router.get("/auth/google")
+async def google_login():
+    """Redirect to Google OAuth consent screen"""
+    params = {
+        'client_id': GOOGLE_CLIENT_ID,
+        'redirect_uri': GOOGLE_REDIRECT_URI,
+        'response_type': 'code',
+        'scope': 'openid email profile',
+        'access_type': 'offline',
+        'prompt': 'consent'
+    }
+    google_auth_url = f"https://accounts.google.com/o/oauth2/v2/auth?{urlencode(params)}"
+    return RedirectResponse(url=google_auth_url)
+
+@api_router.get("/auth/google/callback")
+async def google_callback(code: str, response: Response):
+    """Handle Google OAuth callback"""
+    # Exchange code for tokens
+    token_url = "https://oauth2.googleapis.com/token"
+    token_data = {
+        'client_id': GOOGLE_CLIENT_ID,
+        'client_secret': GOOGLE_CLIENT_SECRET,
+        'code': code,
+        'grant_type': 'authorization_code',
+        'redirect_uri': GOOGLE_REDIRECT_URI
+    }
     
     async with httpx.AsyncClient() as client:
-        resp = await client.get(
-            "https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data",
-            headers={"X-Session-ID": session_id}
+        token_response = await client.post(token_url, data=token_data)
+        if token_response.status_code != 200:
+            raise HTTPException(status_code=400, detail="Failed to get access token")
+        
+        tokens = token_response.json()
+        access_token = tokens.get('access_token')
+        
+        # Get user info from Google
+        userinfo_response = await client.get(
+            "https://www.googleapis.com/oauth2/v2/userinfo",
+            headers={"Authorization": f"Bearer {access_token}"}
         )
         
-        if resp.status_code != 200:
-            raise HTTPException(status_code=401, detail="Invalid session_id")
+        if userinfo_response.status_code != 200:
+            raise HTTPException(status_code=400, detail="Failed to get user info")
         
-        session_data = SessionData(**resp.json())
+        user_info = userinfo_response.json()
     
-    existing_user = await db.users.find_one({"google_user_id": session_data.id}, {"_id": 0})
+    google_user_id = user_info.get('id')
+    email = user_info.get('email')
+    name = user_info.get('name')
+    picture = user_info.get('picture', '')
+    
+    # Check if user exists
+    existing_user = await db.users.find_one({"google_user_id": google_user_id}, {"_id": 0})
     
     if existing_user:
         user_id = existing_user["user_id"]
         await db.users.update_one(
             {"user_id": user_id},
             {"$set": {
-                "email": session_data.email,
-                "name": session_data.name,
-                "picture": session_data.picture
+                "email": email,
+                "name": name,
+                "picture": picture
             }}
         )
     else:
         user_id = f"user_{uuid.uuid4().hex[:12]}"
         await db.users.insert_one({
             "user_id": user_id,
-            "google_user_id": session_data.id,
-            "email": session_data.email,
-            "name": session_data.name,
-            "picture": session_data.picture,
+            "google_user_id": google_user_id,
+            "email": email,
+            "name": name,
+            "picture": picture,
             "access_level": "Limited",
             "subscription_type": None,
             "subscription_status": "none",
@@ -302,26 +341,43 @@ async def create_session(request: Request, response: Response):
             "created_at": datetime.now(timezone.utc).isoformat()
         })
     
+    # Create session
+    session_token = secrets.token_urlsafe(32)
     expires_at = datetime.now(timezone.utc) + timedelta(days=7)
+    
     await db.user_sessions.insert_one({
         "user_id": user_id,
-        "session_token": session_data.session_token,
+        "session_token": session_token,
         "expires_at": expires_at,
         "created_at": datetime.now(timezone.utc)
     })
     
-    response.set_cookie(
+    # Create redirect response with cookie
+    redirect_response = RedirectResponse(url=f"{FRONTEND_URL}/dashboard", status_code=302)
+    redirect_response.set_cookie(
         key="session_token",
-        value=session_data.session_token,
+        value=session_token,
         httponly=True,
-        secure=True,
-        samesite="none",
+        secure=False,  # Set to False for localhost
+        samesite="lax",
         path="/",
         max_age=7*24*60*60
     )
     
-    user = await db.users.find_one({"user_id": user_id}, {"_id": 0})
-    return User(**user)
+    return redirect_response
+
+@api_router.post("/auth/session")
+async def create_session(request: Request, response: Response):
+    """Legacy endpoint - kept for compatibility"""
+    data = await request.json()
+    session_id = data.get("session_id")
+    
+    if not session_id:
+        raise HTTPException(status_code=400, detail="session_id required")
+    
+    # For local development, this endpoint is not used
+    # Google OAuth flow handles authentication directly
+    raise HTTPException(status_code=400, detail="Use /api/auth/google for authentication")
 
 @api_router.get("/auth/me")
 async def get_me(request: Request):
